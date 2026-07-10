@@ -9,13 +9,12 @@ wc-skills/
 ├── konfio/          # Skills específicos del proyecto konfio-app-web
 │   ├── amplitude-events.md
 │   ├── clean-arch-review.md
-│   ├── dev.md
-│   ├── gen-api.md
 │   ├── review-commit-project-rules.md
 │   ├── runtime-mock.md
 │   └── shadcn-ui.md
 └── user/            # Skills a nivel usuario (aplican a cualquier proyecto)
     ├── add-storyblok-component.md
+    ├── gen-api.md
     ├── maintainability-reference.md
     └── review-commit.md
 ```
@@ -363,41 +362,6 @@ Revisa el código indicado contra las reglas de Clean Architecture del equipo (4
 
 ---
 
-#### `dev`
-
-Levanta uno o todos los servicios del monorepo en segundo plano y reporta la URL cuando esté listo.
-
-**Cuándo usarlo:** para arrancar el entorno de desarrollo local.
-
-**Archivo:** [`konfio/dev.md`](konfio/dev.md)
-
-```
-/dev
-/dev funnel
-```
-
----
-
-#### `gen-api`
-
-Generador multi-agente de la capa completa de integración de un endpoint. A partir de una imagen o JSON de respuesta, genera en paralelo: Domain (interfaces + query keys), Infrastructure (API class + mock data + Next.js route handler) y Application (service + adapter + hook), con auditoría al final.
-
-**Cuándo usarlo:** al integrar un nuevo endpoint de backend — ahorra el setup manual de las 3 capas.
-
-**Archivo:** [`konfio/gen-api.md`](konfio/gen-api.md)
-
-```
-/gen-api [imagen del swagger o JSON de respuesta]
-```
-
-**Flujo:**
-1. Analiza imagen o JSON; pide datos faltantes (URL, método HTTP, params)
-2. Lanza 3 agentes en paralelo: Domain Agent, Infrastructure Agent, Application Agent
-3. Agente de auditoría verifica consistencia entre capas
-4. Reporte final con archivos generados y tokens consumidos
-
----
-
 #### `review-commit-project-rules`
 
 Reglas de review específicas de `konfio-app-web`. **Se carga automáticamente** junto con el skill global `/review-commit` — no se invoca directamente.
@@ -449,6 +413,26 @@ NEXT_PUBLIC_MOCK_MODE=false
 ### Skills Usuario — Nivel global
 
 Estos skills están en `~/.claude/commands/` y aplican a cualquier proyecto.
+
+---
+
+#### `gen-api`
+
+Generador multi-agente de la capa completa de integración de un endpoint. A partir de una imagen o JSON de respuesta, genera en paralelo: Domain (interfaces + query keys), Infrastructure (API class + mock data + Next.js route handler) y Application (service + adapter + hook), con auditoría al final.
+
+**Cuándo usarlo:** al integrar un nuevo endpoint de backend — ahorra el setup manual de las 3 capas.
+
+**Archivo:** [`user/gen-api.md`](user/gen-api.md)
+
+```
+/gen-api [imagen del swagger o JSON de respuesta]
+```
+
+**Flujo:**
+1. Analiza imagen o JSON; pide datos faltantes (URL, método HTTP, params)
+2. Lanza 3 agentes en paralelo: Domain Agent, Infrastructure Agent, Application Agent
+3. Agente de auditoría verifica consistencia entre capas
+4. Reporte final con archivos generados y tokens consumidos
 
 ---
 
@@ -515,6 +499,7 @@ Descarga un componente de Storyblok y lo agrega al block-library con las convenc
 cp user/review-commit.md ~/.claude/commands/
 cp user/maintainability-reference.md ~/.claude/commands/
 cp user/add-storyblok-component.md ~/.claude/commands/
+cp user/gen-api.md ~/.claude/commands/
 ```
 
 ### Skills de proyecto (konfio-app-web)
