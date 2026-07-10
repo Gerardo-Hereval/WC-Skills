@@ -1,93 +1,562 @@
 # WC-Skills
 
+Registry de skills de Claude Code usados en el equipo. Incluye skills propios del plugin oficial de Claude y skills personalizados creados para el proyecto `konfio-app-web`.
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Estructura
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/carlos.heredia2/wc-skills.git
-git branch -M main
-git push -uf origin main
+wc-skills/
+├── konfio/          # Skills específicos del proyecto konfio-app-web
+│   ├── amplitude-events.md
+│   ├── clean-arch-review.md
+│   ├── dev.md
+│   ├── gen-api.md
+│   ├── review-commit-project-rules.md
+│   ├── runtime-mock.md
+│   └── shadcn-ui.md
+└── user/            # Skills a nivel usuario (aplican a cualquier proyecto)
+    ├── add-storyblok-component.md
+    ├── maintainability-reference.md
+    └── review-commit.md
 ```
 
-## Integrate with your tools
+> Los skills marcados con **(Claude oficial)** provienen del plugin `claude-plugins-official` y se gestionan automáticamente — no se versionan aquí, solo se documentan como referencia.
 
-* [Set up project integrations](https://gitlab.com/carlos.heredia2/wc-skills/-/settings/integrations)
+---
 
-## Collaborate with your team
+## Cómo usar un skill
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+En Claude Code, escribe `/nombre-del-skill` en el prompt. Algunos aceptan argumentos:
 
-## Test and Deploy
+```
+/gen-api [imagen o JSON]
+/amplitude-events funnel loan_offer_viewed
+/review-commit abc1234
+/add-storyblok-component https://app.storyblok.com/...
+```
 
-Use the built-in continuous integration in GitLab.
+### Dónde colocar los archivos
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+| Alcance | Carpeta |
+|---|---|
+| Proyecto específico | `.claude/commands/<skill>.md` |
+| Usuario global | `~/.claude/commands/<skill>.md` |
 
-***
+---
 
-# Editing this README
+## Registry de Skills
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Skills de Proceso — Claude oficial
 
-## Suggestions for a good README
+Estos skills vienen preinstalados con el plugin `superpowers` de Claude Code. Se invocan automáticamente o manualmente según el contexto.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+#### `superpowers:brainstorming` (Claude oficial)
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Explora el intent, requisitos y opciones de diseño **antes** de escribir código. Se invoca automáticamente al iniciar cualquier tarea de creación de features.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+**Cuándo usarlo:** antes de implementar algo nuevo — features, componentes, modificaciones de comportamiento.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```
+/brainstorming
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+---
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+#### `superpowers:systematic-debugging` (Claude oficial)
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Workflow estructurado para diagnóstico de bugs, fallos de tests o comportamiento inesperado. Evita saltar a fixes sin entender la causa raíz.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**Cuándo usarlo:** cuando algo no funciona y no se sabe por qué.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```
+/systematic-debugging
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+---
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+#### `superpowers:writing-plans` (Claude oficial)
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Genera un plan de implementación paso a paso antes de tocar código. Identifica archivos críticos y trade-offs arquitectónicos.
 
-## License
-For open source projects, say how it is licensed.
+**Cuándo usarlo:** ante tareas multi-paso con spec o requisitos definidos.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```
+/writing-plans
+```
+
+---
+
+#### `superpowers:executing-plans` (Claude oficial)
+
+Ejecuta un plan existente siguiendo su estructura de tareas.
+
+```
+/executing-plans
+```
+
+---
+
+#### `superpowers:subagent-driven-development` (Claude oficial)
+
+Ejecuta planes de implementación usando subagentes paralelos para tareas independientes. Es el modo de ejecución estándar del equipo.
+
+**Cuándo usarlo:** siempre que haya un plan listo para ejecutar.
+
+```
+/subagent-driven-development
+```
+
+---
+
+#### `superpowers:test-driven-development` (Claude oficial)
+
+Guía la implementación con ciclos rojo-verde-refactor. Escribe el test antes del código.
+
+```
+/test-driven-development
+```
+
+---
+
+#### `superpowers:finishing-a-development-branch` (Claude oficial)
+
+Al terminar la implementación, presenta opciones estructuradas de integración: merge, PR o cleanup.
+
+```
+/finishing-a-development-branch
+```
+
+---
+
+#### `superpowers:requesting-code-review` / `superpowers:receiving-code-review` (Claude oficial)
+
+Par de skills para el flujo de code review. El primero prepara el diff; el segundo procesa los comentarios recibidos.
+
+```
+/requesting-code-review
+/receiving-code-review
+```
+
+---
+
+#### `superpowers:verification-before-completion` (Claude oficial)
+
+Checklist de verificación antes de marcar una tarea como completada.
+
+```
+/verification-before-completion
+```
+
+---
+
+#### `superpowers:using-git-worktrees` (Claude oficial)
+
+Configura y usa git worktrees para trabajar en ramas paralelas sin cambiar el working directory principal.
+
+```
+/using-git-worktrees
+```
+
+---
+
+#### `superpowers:writing-skills` (Claude oficial)
+
+Guía para crear nuevos skills siguiendo el formato correcto de frontmatter y estructura.
+
+```
+/writing-skills
+```
+
+---
+
+### Skills de Frontend — Claude oficial
+
+---
+
+#### `frontend-design:frontend-design` (Claude oficial)
+
+Guidance de diseño de componentes frontend: tokens, spacing, jerarquía visual, accesibilidad.
+
+**Cuándo usarlo:** antes de implementar cualquier componente UI.
+
+```
+/frontend-design
+```
+
+---
+
+#### `shadcn-ui` — Konfio
+
+Implementa, refactoriza o audita componentes de `@kui/design-system` usando shadcn/ui y Tailwind. Solo para componentes reutilizables que viven en `packages/design-system/src/ui/` (atoms, molecules, organisms).
+
+**Cuándo usarlo:** al crear o modificar componentes del design system, no componentes app-local.
+
+**Archivo:** [`konfio/shadcn-ui.md`](konfio/shadcn-ui.md)
+
+```
+/shadcn-ui
+```
+
+---
+
+### Skills de Herramientas — Claude oficial
+
+---
+
+#### `verify` (Claude oficial)
+
+Verifica que un cambio funcione end-to-end arrancando el flujo afectado y observando el comportamiento real, no solo tests.
+
+```
+/verify
+```
+
+---
+
+#### `run` (Claude oficial)
+
+Arranca el app del proyecto y observa comportamiento. Busca primero un skill de proyecto que ya cubra el arranque; si no existe, usa patrones built-in.
+
+```
+/run
+```
+
+---
+
+#### `code-review` (Claude oficial)
+
+Revisa el diff actual en busca de bugs de correctness, oportunidades de simplificación y eficiencia. Acepta flags `--comment` (postea en PR) y `--fix` (aplica los cambios).
+
+**Cuándo usarlo:** antes de abrir un MR o como segunda opinión sobre cambios.
+
+```
+/code-review
+/code-review --fix
+/code-review --comment
+```
+
+---
+
+#### `simplify` (Claude oficial)
+
+Revisa el código modificado en busca de oportunidades de simplificación, reutilización y limpieza. Solo calidad — no busca bugs.
+
+```
+/simplify
+```
+
+---
+
+#### `security-review` (Claude oficial)
+
+Audita el diff en busca de vulnerabilidades de seguridad.
+
+```
+/security-review
+```
+
+---
+
+#### `deep-research` (Claude oficial)
+
+Investigación multi-fuente con verificación adversarial y reporte citado. Hace fan-out de búsquedas web, fetch de fuentes y síntesis.
+
+**Cuándo usarlo:** preguntas que requieren múltiples fuentes verificadas.
+
+```
+/deep-research ¿Cómo implementar rate limiting en Next.js Route Handlers?
+```
+
+---
+
+#### `update-config` (Claude oficial)
+
+Configura hooks y comportamientos automáticos en `settings.json`. Necesario para frases del tipo "cada vez que X, haz Y".
+
+```
+/update-config
+```
+
+---
+
+#### `loop` (Claude oficial)
+
+Ejecuta un comando o skill en un intervalo recurrente.
+
+```
+/loop 5m /verify
+```
+
+---
+
+#### `claude-api` (Claude oficial)
+
+Referencia de la API de Claude/Anthropic: model IDs, pricing, parámetros, streaming, tool use, MCP, caching.
+
+```
+/claude-api
+```
+
+---
+
+#### `handoff` (Claude oficial)
+
+Compacta la conversación actual en un documento de handoff para que otro agente o sesión pueda continuar el trabajo.
+
+```
+/handoff "implementar la vista de pagos"
+```
+
+---
+
+### Skills Konfio — Proyecto `konfio-app-web`
+
+Estos skills son específicos del monorepo `konfio-app-web`. Se colocan en `.claude/commands/` en la raíz del proyecto.
+
+---
+
+#### `amplitude-events`
+
+Agrega uno o más eventos de Amplitude tracking al monorepo. Genera las funciones wrapper tipadas en `packages/analytics/src/application/{app}/tracking-events.ts` y actualiza el `package.json` exports si es necesario. Incluye un agente de auditoría al final.
+
+**Cuándo usarlo:** cuando hay que instrumentar un nuevo evento de analytics en cualquier app del monorepo.
+
+**Archivo:** [`konfio/amplitude-events.md`](konfio/amplitude-events.md)
+
+```
+/amplitude-events
+/amplitude-events funnel loan_offer_viewed
+/amplitude-events home home_dashboard_viewed home_banner_clicked
+```
+
+**Flujo:**
+1. Pide app + nombres de eventos si faltan
+2. Verifica que las clases existan en `domain/ampli/index.ts`
+3. Genera/actualiza `tracking-events.ts`
+4. Actualiza `package.json` exports si el app entry no existe
+5. Muestra ejemplo de uso e imprime reporte con tokens consumidos
+
+---
+
+#### `clean-arch-review`
+
+Revisa el código indicado contra las reglas de Clean Architecture del equipo (4 capas: Domain → Infrastructure → Application → UI). Si no se pasa argumento, revisa los archivos modificados en la rama actual.
+
+**Cuándo usarlo:** al finalizar una feature para asegurar que no se violaron las capas.
+
+**Archivo:** [`konfio/clean-arch-review.md`](konfio/clean-arch-review.md)
+
+```
+/clean-arch-review
+/clean-arch-review apps/profile/src/application/hooks/use-staff.hook.ts
+```
+
+**Qué revisa:**
+- Dirección de dependencias entre capas
+- Schemas Zod en `domain/` (no en hooks ni componentes)
+- Hooks con responsabilidad única
+- Services como `const` namespaces estáticos (no clases)
+- Atomic Design: jerarquía Atom → Molecule → Organism → Template
+- Mocks en `src/mocks/` (nunca en `src/infrastructure/`)
+
+---
+
+#### `dev`
+
+Levanta uno o todos los servicios del monorepo en segundo plano y reporta la URL cuando esté listo.
+
+**Cuándo usarlo:** para arrancar el entorno de desarrollo local.
+
+**Archivo:** [`konfio/dev.md`](konfio/dev.md)
+
+```
+/dev
+/dev funnel
+```
+
+---
+
+#### `gen-api`
+
+Generador multi-agente de la capa completa de integración de un endpoint. A partir de una imagen o JSON de respuesta, genera en paralelo: Domain (interfaces + query keys), Infrastructure (API class + mock data + Next.js route handler) y Application (service + adapter + hook), con auditoría al final.
+
+**Cuándo usarlo:** al integrar un nuevo endpoint de backend — ahorra el setup manual de las 3 capas.
+
+**Archivo:** [`konfio/gen-api.md`](konfio/gen-api.md)
+
+```
+/gen-api [imagen del swagger o JSON de respuesta]
+```
+
+**Flujo:**
+1. Analiza imagen o JSON; pide datos faltantes (URL, método HTTP, params)
+2. Lanza 3 agentes en paralelo: Domain Agent, Infrastructure Agent, Application Agent
+3. Agente de auditoría verifica consistencia entre capas
+4. Reporte final con archivos generados y tokens consumidos
+
+---
+
+#### `review-commit-project-rules`
+
+Reglas de review específicas de `konfio-app-web`. **Se carga automáticamente** junto con el skill global `/review-commit` — no se invoca directamente.
+
+**Archivo:** [`konfio/review-commit-project-rules.md`](konfio/review-commit-project-rules.md)
+
+Incluye reglas de:
+- Clean Code (nombres de métodos vs verbo HTTP, tipos Partial, lógica duplicada)
+- Clean Architecture (APIs por dominio, route handlers mock, constantes de infraestructura)
+- New Relic en servicios nuevos
+- Contextos y hooks de aplicación
+- TypeScript / imports (alias `@/`, enums, union types)
+- Atomic Design
+- Tests (pirámide de cobertura, fixtures, Cypress)
+
+---
+
+#### `runtime-mock`
+
+Implementa o audita el Runtime Mock Pattern del equipo: Next.js Route Handlers como servidor mock, funciona para SSR y CSR, visible en el Network tab, aislado del código de producción via env gate.
+
+**Cuándo usarlo:** al configurar el entorno mock de una nueva app o auditar si el patrón está bien implementado.
+
+**Archivo:** [`konfio/runtime-mock.md`](konfio/runtime-mock.md)
+
+```
+/runtime-mock
+```
+
+**Patrón:**
+
+```
+NEXT_PUBLIC_MOCK_MODE=true
+  → apiClient → /api/__mock__/[resource]
+  → Route Handler → Scenario Registry → Fixture Data
+
+NEXT_PUBLIC_MOCK_MODE=false
+  → apiClient → External API → Real Response
+```
+
+**Estructura de archivos que genera:**
+- `src/mocks/fixtures/` — datos estáticos tipados contra Domain Entities
+- `src/mocks/scenarios/scenarios.registry.ts` — mapa de casos de uso
+- `src/app/api/__mock__/[resource]/route.ts` — Route Handler catch-all
+- `src/middleware.ts` — guard que bloquea el mock en producción
+
+---
+
+### Skills Usuario — Nivel global
+
+Estos skills están en `~/.claude/commands/` y aplican a cualquier proyecto.
+
+---
+
+#### `review-commit`
+
+Revisa un commit o MR de GitLab en busca de problemas de mantenibilidad (code-judo), SOLID, Clean Code y Clean Architecture. Recorre cada hallazgo uno por uno, pidiendo confirmación antes de postear cada comentario inline en GitLab.
+
+**Cuándo usarlo:** para revisar cualquier commit o MR antes de merge.
+
+**Archivo:** [`user/review-commit.md`](user/review-commit.md)
+
+> En `konfio-app-web` se combina automáticamente con [`konfio/review-commit-project-rules.md`](konfio/review-commit-project-rules.md) para aplicar también las reglas del proyecto.
+
+```
+/review-commit abc1234
+/review-commit https://gitlab.com/org/repo/-/merge_requests/42
+```
+
+**Flujo:**
+1. Obtiene el diff del commit o MR
+2. Analiza con barra estricta de mantenibilidad (busca "code judo")
+3. Por cada hallazgo pregunta si postear el comentario inline en GitLab
+4. Postea comentario con archivo + línea si el usuario confirma
+
+---
+
+#### `maintainability-reference`
+
+Referencia companion de `/review-commit`. Define qué escalar agresivamente en reviews de mantenibilidad y cómo calibrar severidad. **Se carga automáticamente** al redactar comentarios estructurales — no se invoca directamente.
+
+**Archivo:** [`user/maintainability-reference.md`](user/maintainability-reference.md)
+
+**Qué marca como hallazgo crítico:**
+- Implementaciones complicadas donde un reencuadre más limpio borraría categorías enteras de complejidad
+- Refactors que mueven código sin reducir el número de conceptos
+- Archivos que superan 1000 líneas por el PR
+- Booleanos one-off, modos nullable o flags que complican el flujo de control existente
+- Lógica específica de feature filtrándose a módulos de propósito general
+- Wrappers delgados que agregan indirección sin simplificar nada
+
+---
+
+#### `add-storyblok-component`
+
+Descarga un componente de Storyblok y lo agrega al block-library con las convenciones del proyecto (nombre de archivo, `component_group_name`, carpeta correcta). Crea el grupo en `component-groups.json` si no existe.
+
+**Cuándo usarlo:** al incorporar un nuevo componente CMS de Storyblok al proyecto.
+
+**Archivo:** [`user/add-storyblok-component.md`](user/add-storyblok-component.md)
+
+```
+/add-storyblok-component https://app.storyblok.com/#/me/spaces/123456/components/789
+/add-storyblok-component 123456 789
+```
+
+---
+
+## Instalación
+
+### Skills de usuario (globales)
+
+```bash
+# Copia los archivos de user/ a tu directorio global de commands
+cp user/review-commit.md ~/.claude/commands/
+cp user/maintainability-reference.md ~/.claude/commands/
+cp user/add-storyblok-component.md ~/.claude/commands/
+```
+
+### Skills de proyecto (konfio-app-web)
+
+```bash
+# Copia los archivos de konfio/ al proyecto
+cp konfio/*.md /ruta/a/konfio-app-web/.claude/commands/
+```
+
+### Skills de Claude oficial
+
+Se instalan a través del plugin marketplace de Claude Code:
+
+```
+superpowers       → claude-plugins-official/superpowers
+frontend-design   → claude-plugins-official/frontend-design
+```
+
+---
+
+## Contribuir
+
+Para agregar un nuevo skill:
+
+1. Crea el archivo `.md` en la carpeta correspondiente (`konfio/` o `user/`)
+2. Agrega el frontmatter con `name`, `description` y `user-invocable`
+3. Documenta en este README: qué hace, cuándo usarlo y ejemplos
+4. Abre un MR con el nuevo skill
+
+**Formato mínimo de frontmatter:**
+
+```yaml
+---
+name: mi-skill
+description: >
+  Descripción de una línea de qué hace el skill.
+  Uso: /mi-skill [argumento]
+user-invocable: true
+allowed-tools:
+  - Bash
+  - Read
+  - Edit
+  - Write
+---
+```
