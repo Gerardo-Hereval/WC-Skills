@@ -12,6 +12,7 @@ wc-skills/
 │   ├── review-commit-project-rules.md
 │   ├── runtime-mock.md
 │   └── shadcn-ui.md
+│   └── test-e2e.md
 └── user/            # Skills a nivel usuario (aplican a cualquier proyecto)
     ├── add-storyblok-component.md
     ├── gen-api.md
