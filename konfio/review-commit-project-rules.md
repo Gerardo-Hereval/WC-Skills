@@ -14,6 +14,8 @@ Estas reglas se combinan con las reglas genéricas del skill global `/review-com
 
 ### Clean Code
 
+- **Comentarios en código** — si el código tiene comentarios, sugerir que los eliminen. Solo agregar contexto extra cuando el nombre de la función/método no refleja lo que hace: en ese caso sugerir un nombre que lo deje claro. Si el nombre ya tiene sentido, el comentario de review es únicamente "remove comment"
+- **Artefactos de debug** (`console.log`, `alert`, `debugger`, `console.error`, `console.warn`) — el comentario de review es solo `delete`, sin descripción adicional
 - **Nombre engañoso de método vs verbo HTTP** — si un método se llama `deleteX` pero internamente hace `PUT { isActive: false }` (soft-delete), el nombre debe reflejar el contrato real (`deactivateX`) para no engañar al lector sobre el método HTTP usado
 - **Lógica duplicada de derivación** — si el mismo valor se calcula de dos formas distintas dentro del mismo handler (ej. `parentId` derivado dos veces por ramas distintas), extraer a una función `resolveX()` que sea testeable de forma aislada
 - **Tipos `Partial<Pick<…>>` que pierden garantías requeridas** — si un campo es siempre requerido en creación pero opcional en actualización, dividir en dos tipos distintos en lugar de `Partial` global
@@ -39,6 +41,7 @@ Estas reglas se combinan con las reglas genéricas del skill global `/review-com
 ### Hooks de aplicación
 
 - Templates/views con múltiples `useState`, handlers y mutations — ¿debería extraerse a un custom hook `use-<feature>-view.hook.ts`?
+- **Query hook que llama a múltiples endpoints internamente** — si un `useQuery` orquesta llamadas a varios endpoints (directamente o a través de otros queries), sugerir mover esas llamadas como multi-llamadas paralelas directamente en el service (ej. `Promise.all([api.getA(), api.getB()])`), sin pasar por un query intermediario; aplica solo a queries, no a mutations
 - `useMutation` sin `mutationKey` — seguir el mismo patrón que `queryKey` usando constantes en `query-keys.constants.ts`
 - **Magic number `0` como fallback para IDs** — si `chart?.id ?? 0` se usa para inicializar mutaciones antes de que el recurso cargue, las mutaciones pueden dispararse con ID inválido ante un race condition; preferir guards o mutaciones condicionales
 - **`reset()` del formulario antes de confirmar mutación** — llamar `reset()` sincrónicamente en el handler hace que el usuario pierda los datos si la mutación falla; limpiar el formulario solo en `onSuccess` o al cerrar el drawer
