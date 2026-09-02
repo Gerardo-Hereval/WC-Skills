@@ -13,11 +13,14 @@ wc-skills/
 │   ├── runtime-mock.md
 │   └── shadcn-ui.md
 │   └── test-e2e.md
-└── user/            # Skills a nivel usuario (aplican a cualquier proyecto)
-    ├── add-storyblok-component.md
-    ├── gen-api.md
-    ├── maintainability-reference.md
-    └── review-commit.md
+├── user/            # Skills a nivel usuario (aplican a cualquier proyecto)
+│   ├── gen-api.md
+│   ├── maintainability-reference.md
+│   ├── pull-storyblok-component.md
+│   └── review-commit.md
+└── scripts/         # Scripts que acompañan a los skills (se instalan en su repo destino)
+    └── block-library/
+        └── download-component.sh
 ```
 
 > Los skills marcados con **(Claude oficial)** provienen del plugin `claude-plugins-official` y se gestionan automáticamente — no se versionan aquí, solo se documentan como referencia.
@@ -32,7 +35,7 @@ En Claude Code, escribe `/nombre-del-skill` en el prompt. Algunos aceptan argume
 /gen-api [imagen o JSON]
 /amplitude-events funnel loan_offer_viewed
 /review-commit abc1234
-/add-storyblok-component https://app.storyblok.com/...
+/pull-storyblok-component https://app.storyblok.com/...
 ```
 
 ### Dónde colocar los archivos
@@ -319,7 +322,7 @@ Estos skills son específicos del monorepo `konfio-app-web`. Se colocan en `.cla
 
 #### `amplitude-events`
 
-Agrega uno o más eventos de Amplitude tracking al monorepo. Genera las funciones wrapper tipadas en `packages/analytics/src/application/{app}/tracking-events.ts` y actualiza el `package.json` exports si es necesario. Incluye un agente de auditoría al final.
+Agrega uno o más eventos de Amplitude tracking al monorepo. Genera las funciones wrapper tipadas en `packages/analytics/src/application/{app}/tracking-events.ts`, exporta el archivo de eventos desde el `package.json` exports, crea el analytics hook cuando hay lógica de negocio (mount → `useEffect`; interacción → función simple sin `useCallback`) y actualiza el componente consumidor. Incluye un agente de auditoría al final. El skill no contiene templates de código: instruye a leer el código existente como fuente de verdad y deja las reglas de estilo (orden de imports, formato) a los linters.
 
 **Cuándo usarlo:** cuando hay que instrumentar un nuevo evento de analytics en cualquier app del monorepo.
 
@@ -332,11 +335,12 @@ Agrega uno o más eventos de Amplitude tracking al monorepo. Genera las funcione
 ```
 
 **Flujo:**
-1. Pide app + nombres de eventos si faltan
+1. Pide app + nombres de eventos + archivo consumidor + trigger si faltan
 2. Verifica que las clases existan en `domain/ampli/index.ts`
-3. Genera/actualiza `tracking-events.ts`
+3. Genera/actualiza `tracking-events.ts` replicando el patrón existente
 4. Actualiza `package.json` exports si el app entry no existe
-5. Muestra ejemplo de uso e imprime reporte con tokens consumidos
+5. Decide hook vs llamada directa (aceptable solo si no hay lógica de negocio)
+6. Actualiza consumidor y parent, lanza agente de auditoría e imprime reporte
 
 ---
 
@@ -476,17 +480,19 @@ Referencia companion de `/review-commit`. Define qué escalar agresivamente en r
 
 ---
 
-#### `add-storyblok-component`
+#### `pull-storyblok-component`
 
-Descarga un componente de Storyblok y lo agrega al block-library con las convenciones del proyecto (nombre de archivo, `component_group_name`, carpeta correcta). Crea el grupo en `component-groups.json` si no existe.
+Descarga un componente de Storyblok y lo agrega al block-library con las convenciones del proyecto. Toda la parte mecánica está automatizada en el script `download-component.sh` del repo `block-library` (expuesto como `pnpm download:component`): parseo de URL/IDs, inferencia del spaceId legacy, resolución de la carpeta destino desde `component-groups.json`, alta del grupo nuevo, limpieza de metadatos de entorno, `component_group_name`, `display_name`, `is_root` y renombrado del archivo. El skill solo decide el grupo correcto y verifica el resultado.
 
 **Cuándo usarlo:** al incorporar un nuevo componente CMS de Storyblok al proyecto.
 
-**Archivo:** [`user/add-storyblok-component.md`](user/add-storyblok-component.md)
+**Archivo:** [`user/pull-storyblok-component.md`](user/pull-storyblok-component.md)
+**Script:** [`scripts/block-library/download-component.sh`](scripts/block-library/download-component.sh) — debe existir en `block-library/scripts/` con el entry `download:component` en su `package.json`.
 
 ```
-/add-storyblok-component https://app.storyblok.com/#/me/spaces/123456/components/789
-/add-storyblok-component 123456 789
+/pull-storyblok-component https://app.storyblok.com/#/me/spaces/123456/components/789
+/pull-storyblok-component 123456 789
+/pull-storyblok-component 789
 ```
 
 ---
@@ -499,8 +505,17 @@ Descarga un componente de Storyblok y lo agrega al block-library con las convenc
 # Copia los archivos de user/ a tu directorio global de commands
 cp user/review-commit.md ~/.claude/commands/
 cp user/maintainability-reference.md ~/.claude/commands/
-cp user/add-storyblok-component.md ~/.claude/commands/
+cp user/pull-storyblok-component.md ~/.claude/commands/
 cp user/gen-api.md ~/.claude/commands/
+```
+
+### Scripts que acompañan a los skills
+
+```bash
+# pull-storyblok-component depende de este script en el repo block-library
+cp scripts/block-library/download-component.sh /ruta/a/block-library/scripts/
+# y del entry en block-library/package.json:
+#   "download:component": "bash scripts/download-component.sh"
 ```
 
 ### Skills de proyecto (konfio-app-web)
