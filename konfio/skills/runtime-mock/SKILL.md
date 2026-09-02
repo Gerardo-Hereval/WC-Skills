@@ -1,3 +1,12 @@
+---
+name: runtime-mock
+description: >
+  Implementa o audita el Runtime Mock Pattern del equipo en konfio-app-web:
+  Next.js Route Handlers como servidor mock (SSR y CSR), aislado de producción
+  vía env gate. Uso: /runtime-mock
+user-invocable: true
+---
+
 # /runtime-mock — Implementar o auditar Runtime Mock Pattern (Next.js)
 
 Implementa o revisa el patrón de simulación de mocks en runtime usando Next.js Route Handlers.

@@ -1,0 +1,11 @@
+{
+  "name": "wc-user-skills",
+  "version": "1.0.0",
+  "description": "Global team skills: /review-commit (GitLab MR review with reviewer/falsifier agents, deterministic detectors and publisher), /pull-storyblok-component, /gen-api and the maintainability reference.",
+  "author": {
+    "name": "Gerardo Hereval",
+    "url": "https://github.com/Gerardo-Hereval"
+  },
+  "repository": "https://github.com/Gerardo-Hereval/WC-Skills",
+  "keywords": ["review", "gitlab", "storyblok", "maintainability", "code-judo"]
+}

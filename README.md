@@ -4,23 +4,24 @@ Registry de skills de Claude Code usados en el equipo. Incluye skills propios de
 
 ## Estructura
 
+Este repo es un **marketplace de plugins de Claude Code** con dos plugins instalables:
+
 ```
 wc-skills/
-├── konfio/          # Skills específicos del proyecto konfio-app-web
-│   ├── amplitude-events.md
-│   ├── clean-arch-review.md
-│   ├── review-commit-project-rules.md
-│   ├── runtime-mock.md
-│   └── shadcn-ui.md
-│   └── test-e2e.md
-├── user/            # Skills a nivel usuario (aplican a cualquier proyecto)
-│   ├── gen-api.md
-│   ├── maintainability-reference.md
-│   ├── pull-storyblok-component.md
-│   └── review-commit.md
-└── scripts/         # Scripts que acompañan a los skills (se instalan en su repo destino)
-    └── block-library/
-        └── download-component.sh
+├── .claude-plugin/marketplace.json   # Manifest del marketplace "wc-skills"
+├── user/                             # Plugin: wc-user-skills (aplica a cualquier proyecto)
+│   ├── .claude-plugin/plugin.json
+│   ├── skills/                       # gen-api, maintainability-reference,
+│   │                                 # pull-storyblok-component, review-commit
+│   ├── agents/                       # code-reviewer, gitlab-publisher, review-fixer
+│   └── scripts/                      # gitlab-mr.py, review-detectors.py
+├── konfio/                           # Plugin: wc-konfio-skills (monorepo konfio-app-web)
+│   ├── .claude-plugin/plugin.json
+│   └── skills/                       # amplitude-events, clean-arch-review, component-spec,
+│                                     # review-commit-project-rules, runtime-mock,
+│                                     # shadcn-ui, test-e2e
+└── scripts/                          # Scripts que se instalan en su repo destino
+    └── block-library/download-component.sh
 ```
 
 > Los skills marcados con **(Claude oficial)** provienen del plugin `claude-plugins-official` y se gestionan automáticamente — no se versionan aquí, solo se documentan como referencia.
@@ -38,12 +39,25 @@ En Claude Code, escribe `/nombre-del-skill` en el prompt. Algunos aceptan argume
 /pull-storyblok-component https://app.storyblok.com/...
 ```
 
-### Dónde colocar los archivos
+### Instalación rápida (30 segundos)
 
-| Alcance | Carpeta |
-|---|---|
-| Proyecto específico | `.claude/commands/<skill>.md` |
-| Usuario global | `~/.claude/commands/<skill>.md` |
+Dentro de una sesión de Claude Code:
+
+```
+/plugin marketplace add Gerardo-Hereval/WC-Skills
+/plugin install wc-user-skills@wc-skills
+/plugin install wc-konfio-skills@wc-skills
+```
+
+O desde la terminal:
+
+```bash
+claude plugin marketplace add Gerardo-Hereval/WC-Skills
+claude plugin install wc-user-skills@wc-skills
+claude plugin install wc-konfio-skills@wc-skills
+```
+
+`wc-user-skills` sirve en cualquier proyecto; `wc-konfio-skills` solo tiene sentido si trabajas en `konfio-app-web`. Los updates llegan con `/plugin marketplace update wc-skills`. Si antes copiabas los `.md` a `~/.claude/commands/` o `.claude/commands/`, borra esas copias al instalar los plugins para no tener cada skill duplicado.
 
 ---
 
@@ -196,7 +210,7 @@ Implementa, refactoriza o audita componentes de `@kui/design-system` usando shad
 
 **Cuándo usarlo:** al crear o modificar componentes del design system, no componentes app-local.
 
-**Archivo:** [`konfio/shadcn-ui.md`](konfio/shadcn-ui.md)
+**Archivo:** [`konfio/skills/shadcn-ui/SKILL.md`](konfio/skills/shadcn-ui/SKILL.md)
 
 ```
 /shadcn-ui
@@ -326,7 +340,7 @@ Agrega uno o más eventos de Amplitude tracking al monorepo. Genera las funcione
 
 **Cuándo usarlo:** cuando hay que instrumentar un nuevo evento de analytics en cualquier app del monorepo.
 
-**Archivo:** [`konfio/amplitude-events.md`](konfio/amplitude-events.md)
+**Archivo:** [`konfio/skills/amplitude-events/SKILL.md`](konfio/skills/amplitude-events/SKILL.md)
 
 ```
 /amplitude-events
@@ -350,7 +364,7 @@ Revisa el código indicado contra las reglas de Clean Architecture del equipo (4
 
 **Cuándo usarlo:** al finalizar una feature para asegurar que no se violaron las capas.
 
-**Archivo:** [`konfio/clean-arch-review.md`](konfio/clean-arch-review.md)
+**Archivo:** [`konfio/skills/clean-arch-review/SKILL.md`](konfio/skills/clean-arch-review/SKILL.md)
 
 ```
 /clean-arch-review
@@ -371,7 +385,7 @@ Revisa el código indicado contra las reglas de Clean Architecture del equipo (4
 
 Reglas de review específicas de `konfio-app-web`. **Se carga automáticamente** junto con el skill global `/review-commit` — no se invoca directamente.
 
-**Archivo:** [`konfio/review-commit-project-rules.md`](konfio/review-commit-project-rules.md)
+**Archivo:** [`konfio/skills/review-commit-project-rules/SKILL.md`](konfio/skills/review-commit-project-rules/SKILL.md)
 
 Incluye reglas de:
 - Clean Code (nombres de métodos vs verbo HTTP, tipos Partial, lógica duplicada)
@@ -390,7 +404,7 @@ Implementa o audita el Runtime Mock Pattern del equipo: Next.js Route Handlers c
 
 **Cuándo usarlo:** al configurar el entorno mock de una nueva app o auditar si el patrón está bien implementado.
 
-**Archivo:** [`konfio/runtime-mock.md`](konfio/runtime-mock.md)
+**Archivo:** [`konfio/skills/runtime-mock/SKILL.md`](konfio/skills/runtime-mock/SKILL.md)
 
 ```
 /runtime-mock
@@ -427,7 +441,7 @@ Generador multi-agente de la capa completa de integración de un endpoint. A par
 
 **Cuándo usarlo:** al integrar un nuevo endpoint de backend — ahorra el setup manual de las 3 capas.
 
-**Archivo:** [`user/gen-api.md`](user/gen-api.md)
+**Archivo:** [`user/skills/gen-api/SKILL.md`](user/skills/gen-api/SKILL.md)
 
 ```
 /gen-api [imagen del swagger o JSON de respuesta]
@@ -447,9 +461,9 @@ Revisa un commit o MR de GitLab en busca de problemas de mantenibilidad (code-ju
 
 **Cuándo usarlo:** para revisar cualquier commit o MR antes de merge.
 
-**Archivo:** [`user/review-commit.md`](user/review-commit.md)
+**Archivo:** [`user/skills/review-commit/SKILL.md`](user/skills/review-commit/SKILL.md)
 
-> En `konfio-app-web` se combina automáticamente con [`konfio/review-commit-project-rules.md`](konfio/review-commit-project-rules.md) para aplicar también las reglas del proyecto.
+> En `konfio-app-web` se combina automáticamente con [`konfio/skills/review-commit-project-rules/SKILL.md`](konfio/skills/review-commit-project-rules/SKILL.md) para aplicar también las reglas del proyecto.
 
 ```
 /review-commit abc1234
@@ -468,7 +482,7 @@ Revisa un commit o MR de GitLab en busca de problemas de mantenibilidad (code-ju
 
 Referencia companion de `/review-commit`. Define qué escalar agresivamente en reviews de mantenibilidad y cómo calibrar severidad. **Se carga automáticamente** al redactar comentarios estructurales — no se invoca directamente.
 
-**Archivo:** [`user/maintainability-reference.md`](user/maintainability-reference.md)
+**Archivo:** [`user/skills/maintainability-reference/SKILL.md`](user/skills/maintainability-reference/SKILL.md)
 
 **Qué marca como hallazgo crítico:**
 - Implementaciones complicadas donde un reencuadre más limpio borraría categorías enteras de complejidad
@@ -486,7 +500,7 @@ Descarga un componente de Storyblok y lo agrega al block-library con las convenc
 
 **Cuándo usarlo:** al incorporar un nuevo componente CMS de Storyblok al proyecto.
 
-**Archivo:** [`user/pull-storyblok-component.md`](user/pull-storyblok-component.md)
+**Archivo:** [`user/skills/pull-storyblok-component/SKILL.md`](user/skills/pull-storyblok-component/SKILL.md)
 **Script:** [`scripts/block-library/download-component.sh`](scripts/block-library/download-component.sh) — debe existir en `block-library/scripts/` con el entry `download:component` en su `package.json`.
 
 ```
@@ -499,15 +513,13 @@ Descarga un componente de Storyblok y lo agrega al block-library con las convenc
 
 ## Instalación
 
-### Skills de usuario (globales)
+### Plugins del equipo
 
-```bash
-# Copia los archivos de user/ a tu directorio global de commands
-cp user/review-commit.md ~/.claude/commands/
-cp user/maintainability-reference.md ~/.claude/commands/
-cp user/pull-storyblok-component.md ~/.claude/commands/
-cp user/gen-api.md ~/.claude/commands/
-```
+Ver **Instalación rápida** arriba: `/plugin marketplace add Gerardo-Hereval/WC-Skills` y luego `/plugin install` de cada plugin. Los plugins incluyen los skills, los agents del flujo de review (`code-reviewer`, `gitlab-publisher`, `review-fixer`) y los scripts que estos usan (`gitlab-mr.py`, `review-detectors.py`) — no hace falta copiar nada a mano.
+
+Requisitos de runtime:
+- `/review-commit` en modo MR necesita `GITLAB_TOKEN` exportado en el entorno
+- `/pull-storyblok-component` necesita `STORYBLOK_TOKEN` y el script instalado en `block-library` (abajo)
 
 ### Scripts que acompañan a los skills
 
@@ -516,13 +528,6 @@ cp user/gen-api.md ~/.claude/commands/
 cp scripts/block-library/download-component.sh /ruta/a/block-library/scripts/
 # y del entry en block-library/package.json:
 #   "download:component": "bash scripts/download-component.sh"
-```
-
-### Skills de proyecto (konfio-app-web)
-
-```bash
-# Copia los archivos de konfio/ al proyecto
-cp konfio/*.md /ruta/a/konfio-app-web/.claude/commands/
 ```
 
 ### Skills de Claude oficial
@@ -540,10 +545,11 @@ frontend-design   → claude-plugins-official/frontend-design
 
 Para agregar un nuevo skill:
 
-1. Crea el archivo `.md` en la carpeta correspondiente (`konfio/` o `user/`)
+1. Crea `konfio/skills/<nombre>/SKILL.md` o `user/skills/<nombre>/SKILL.md` según el alcance
 2. Agrega el frontmatter con `name`, `description` y `user-invocable`
-3. Documenta en este README: qué hace, cuándo usarlo y ejemplos
-4. Abre un MR con el nuevo skill
+3. Valida con `claude plugin validate ./konfio` (o `./user`)
+4. Documenta en este README: qué hace, cuándo usarlo y ejemplos
+5. Abre un MR — al mergear, quienes tienen el plugin reciben el skill con `/plugin marketplace update wc-skills`
 
 **Formato mínimo de frontmatter:**
 

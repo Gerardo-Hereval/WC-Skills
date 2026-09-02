@@ -1,0 +1,11 @@
+{
+  "name": "wc-konfio-skills",
+  "version": "1.0.0",
+  "description": "Skills for the konfio-app-web monorepo: /amplitude-events, /clean-arch-review, /shadcn-ui, /runtime-mock, /component-spec, /test-e2e and the review-commit project rules.",
+  "author": {
+    "name": "Gerardo Hereval",
+    "url": "https://github.com/Gerardo-Hereval"
+  },
+  "repository": "https://github.com/Gerardo-Hereval/WC-Skills",
+  "keywords": ["konfio", "amplitude", "clean-architecture", "shadcn", "cypress"]
+}

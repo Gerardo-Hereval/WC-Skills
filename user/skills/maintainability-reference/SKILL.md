@@ -1,6 +1,14 @@
+---
+name: maintainability-reference
+description: >
+  Companion reference for /review-commit. Use when drafting structural review
+  comments or calibrating severity — defines what to escalate aggressively in
+  maintainability reviews. Loaded by the review flow, not invoked directly.
+---
+
 # Maintainability reference (thermo-nuclear)
 
-Companion to `/review-commit`. Use when drafting structural comments or calibrating severity. The operational workflow lives in `~/.claude/commands/review-commit.md`.
+Companion to `/review-commit`. Use when drafting structural comments or calibrating severity. The operational workflow lives in the `/review-commit` skill in this plugin.
 
 ## What to flag aggressively
 

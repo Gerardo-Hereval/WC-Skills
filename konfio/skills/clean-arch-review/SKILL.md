@@ -1,3 +1,13 @@
+---
+name: clean-arch-review
+description: >
+  Revisa el código indicado contra las reglas de Clean Architecture del equipo
+  (Domain → Infrastructure → Application → UI) en konfio-app-web. Sin argumento,
+  revisa los archivos modificados en la rama actual.
+  Uso: /clean-arch-review [ruta]
+user-invocable: true
+---
+
 # /clean-arch-review — Revisión de Clean Architecture (Next.js)
 
 Revisa el código indicado contra las reglas de arquitectura que usa este equipo.
