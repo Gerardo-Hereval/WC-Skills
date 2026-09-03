@@ -74,8 +74,9 @@ if [ -n "$existing" ]; then
   echo "$existing" | python3 -c "
 import json,sys
 s=json.load(sys.stdin)
-print(f\"   EXISTS  id={s['id']} — promoting would need an update, not a create\")
+print(f\"   EXISTS  id={s['id']} — this skill only creates; update it in the editor or delete it first\")
 "
+  fail=1
 else
   echo "   OK      slug is free"
 fi
@@ -94,8 +95,10 @@ else: print(f'   asset hosts found: {sorted(urls)}')
 
 echo
 if [ "$fail" -ne 0 ]; then
-  echo "PREFLIGHT FAILED — fix the MISSING items before promoting."
-  echo "Components are NOT created by this skill: register them in block-library and let CI deploy them."
+  echo "PREFLIGHT FAILED — resolve the items above before promoting."
+  echo "  MISSING component -> register it in block-library; CI deploys it. This skill never creates one."
+  echo "  MISSING folder    -> create it in the Storyblok editor; this skill never creates folders."
+  echo "  EXISTS story      -> this skill only creates. Update it in the editor, or delete it first."
   exit 1
 fi
 echo "PREFLIGHT PASSED"
