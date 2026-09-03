@@ -9,7 +9,7 @@
     {
       "name": "wc-user-skills",
       "source": "./user",
-      "description": "Global team skills: /review-commit (GitLab MR review with reviewer/falsifier agents, deterministic detectors and publisher), /pull-storyblok-component, /gen-api, /description-mr, /handoff and the maintainability reference.",
+      "description": "Global team skills: /review-commit (GitLab MR review with reviewer/falsifier agents, deterministic detectors and publisher), /pull-storyblok-component, /gen-api, /description-mr and the maintainability reference.",
       "category": "engineering",
       "keywords": [
         "review",

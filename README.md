@@ -13,7 +13,7 @@ wc-skills/
 │   ├── .claude-plugin/plugin.json
 │   ├── skills/                       # gen-api, maintainability-reference,
 │   │                                 # pull-storyblok-component, review-commit,
-│   │                                 # description-mr, handoff
+│   │                                 # description-mr
 │   ├── agents/                       # code-reviewer, gitlab-publisher, review-fixer
 │   └── scripts/                      # gitlab-mr.py, review-detectors.py
 ├── konfio/                           # Plugin: wc-konfio-skills (monorepo konfio-app-web)
@@ -320,11 +320,9 @@ Referencia de la API de Claude/Anthropic: model IDs, pricing, parámetros, strea
 
 ---
 
-#### `handoff`
+#### `handoff` (Claude oficial)
 
-Compacta la conversación actual en un documento de handoff para que otro agente o sesión pueda continuar el trabajo. Incluye una sección de "suggested skills" y referencia artefactos existentes (planes, ADRs, MRs) por ruta en lugar de duplicarlos.
-
-**Archivo:** [`user/skills/handoff/SKILL.md`](user/skills/handoff/SKILL.md)
+Compacta la conversación actual en un documento de handoff para que otro agente o sesión pueda continuar el trabajo.
 
 ```
 /handoff "implementar la vista de pagos"
