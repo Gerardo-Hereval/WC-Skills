@@ -12,14 +12,16 @@ wc-skills/
 ├── user/                             # Plugin: wc-user-skills (aplica a cualquier proyecto)
 │   ├── .claude-plugin/plugin.json
 │   ├── skills/                       # gen-api, maintainability-reference,
-│   │                                 # pull-storyblok-component, review-commit
+│   │                                 # pull-storyblok-component, review-commit,
+│   │                                 # description-mr, handoff
 │   ├── agents/                       # code-reviewer, gitlab-publisher, review-fixer
 │   └── scripts/                      # gitlab-mr.py, review-detectors.py
 ├── konfio/                           # Plugin: wc-konfio-skills (monorepo konfio-app-web)
 │   ├── .claude-plugin/plugin.json
 │   └── skills/                       # amplitude-events, clean-arch-review, component-spec,
-│                                     # review-commit-project-rules, runtime-mock,
-│                                     # shadcn-ui, test-e2e
+│                                     # review-commit-project-rules, runtime-mock, shadcn-ui,
+│                                     # test-e2e, audit-konfio-libraries,
+│                                     # migrate-konfio-design-system
 └── scripts/                          # Scripts que se instalan en su repo destino
     └── block-library/download-component.sh
 ```
@@ -318,9 +320,11 @@ Referencia de la API de Claude/Anthropic: model IDs, pricing, parámetros, strea
 
 ---
 
-#### `handoff` (Claude oficial)
+#### `handoff`
 
-Compacta la conversación actual en un documento de handoff para que otro agente o sesión pueda continuar el trabajo.
+Compacta la conversación actual en un documento de handoff para que otro agente o sesión pueda continuar el trabajo. Incluye una sección de "suggested skills" y referencia artefactos existentes (planes, ADRs, MRs) por ruta en lugar de duplicarlos.
+
+**Archivo:** [`user/skills/handoff/SKILL.md`](user/skills/handoff/SKILL.md)
 
 ```
 /handoff "implementar la vista de pagos"
@@ -429,9 +433,38 @@ NEXT_PUBLIC_MOCK_MODE=false
 
 ---
 
+#### `audit-konfio-libraries`
+
+Inventario read-only (solo chat) de imports de `@konfio/*` y `@kui/design-system` en `apps/<app>` o en todo el monorepo. Reporta versiones declaradas, conteo de imports por componente y wiring de CSS. No migra ni edita nada.
+
+**Cuándo usarlo:** antes o después de una migración NDS, o para saber qué librerías legacy sigue usando una app.
+
+**Archivo:** [`konfio/skills/audit-konfio-libraries/SKILL.md`](konfio/skills/audit-konfio-libraries/SKILL.md)
+
+```
+/audit-konfio-libraries apps/cards
+/audit-konfio-libraries          # monorepo completo
+```
+
+---
+
+#### `migrate-konfio-design-system`
+
+Migración **resumible** de `apps/<app>` de `@kui/design-system` (workspace) a `@konfio/design-system` (npm publicado): instalación con catalog pin, `globals.css`, reescritura de imports y diff de API opcional. Guarda el progreso en `apps/<app>/.nds-migration/progress.md` para continuar entre sesiones.
+
+**Cuándo usarlo:** al migrar una app al NDS publicado o continuar una migración a medias.
+
+**Archivo:** [`konfio/skills/migrate-konfio-design-system/SKILL.md`](konfio/skills/migrate-konfio-design-system/SKILL.md)
+
+```
+/migrate-konfio-design-system apps/payments
+```
+
+---
+
 ### Skills Usuario — Nivel global
 
-Estos skills están en `~/.claude/commands/` y aplican a cualquier proyecto.
+Skills del plugin `wc-user-skills` — aplican a cualquier proyecto.
 
 ---
 
@@ -507,6 +540,20 @@ Descarga un componente de Storyblok y lo agrega al block-library con las convenc
 /pull-storyblok-component https://app.storyblok.com/#/me/spaces/123456/components/789
 /pull-storyblok-component 123456 789
 /pull-storyblok-component 789
+```
+
+---
+
+#### `description-mr`
+
+Genera una descripción de MR de GitLab en inglés a partir del diff real de la rama contra `main`: qué cambió, por qué, cómo probarlo. Funciona en cualquier repo.
+
+**Cuándo usarlo:** antes de abrir o actualizar un MR, para documentar los cambios.
+
+**Archivo:** [`user/skills/description-mr/SKILL.md`](user/skills/description-mr/SKILL.md)
+
+```
+/description-mr
 ```
 
 ---

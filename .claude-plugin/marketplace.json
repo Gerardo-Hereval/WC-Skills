@@ -9,16 +9,28 @@
     {
       "name": "wc-user-skills",
       "source": "./user",
-      "description": "Global team skills: /review-commit (GitLab MR review with reviewer/falsifier agents, deterministic detectors and publisher), /pull-storyblok-component, /gen-api and the maintainability reference.",
+      "description": "Global team skills: /review-commit (GitLab MR review with reviewer/falsifier agents, deterministic detectors and publisher), /pull-storyblok-component, /gen-api, /description-mr, /handoff and the maintainability reference.",
       "category": "engineering",
-      "keywords": ["review", "gitlab", "storyblok", "maintainability", "code-judo"]
+      "keywords": [
+        "review",
+        "gitlab",
+        "storyblok",
+        "maintainability",
+        "code-judo"
+      ]
     },
     {
       "name": "wc-konfio-skills",
       "source": "./konfio",
-      "description": "Skills for the konfio-app-web monorepo: /amplitude-events, /clean-arch-review, /shadcn-ui, /runtime-mock, /component-spec, /test-e2e and the review-commit project rules.",
+      "description": "Skills for the konfio-app-web monorepo: /amplitude-events, /clean-arch-review, /shadcn-ui, /runtime-mock, /component-spec, /test-e2e, /audit-konfio-libraries, /migrate-konfio-design-system and the review-commit project rules.",
       "category": "engineering",
-      "keywords": ["konfio", "amplitude", "clean-architecture", "shadcn", "cypress"]
+      "keywords": [
+        "konfio",
+        "amplitude",
+        "clean-architecture",
+        "shadcn",
+        "cypress"
+      ]
     }
   ]
 }
