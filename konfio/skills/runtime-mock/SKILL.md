@@ -7,6 +7,7 @@ description: >
 user-invocable: true
 ---
 
+
 # /runtime-mock — Implementar o auditar Runtime Mock Pattern (Next.js)
 
 Implementa o revisa el patrón de simulación de mocks en runtime usando Next.js Route Handlers.
@@ -72,81 +73,80 @@ Nunca por Domain, Infrastructure, Application ni UI.
 ## IMPLEMENTACIÓN — 3 ARCHIVOS PRINCIPALES
 
 ### 1. `src/mocks/scenarios/scenarios.registry.ts`
+
 ```ts
-import { userNominal, userEmpty, userSuspended } from '../fixtures/users'
-import { ordersEmpty, ordersPending } from '../fixtures/orders'
-import type { User } from '@/domain/entities/User'
-import type { Order } from '@/domain/entities/Order'
+import { userNominal, userEmpty, userSuspended } from '../fixtures/users';
+import { ordersEmpty, ordersPending } from '../fixtures/orders';
+import type { User } from '@/domain/entities/User';
+import type { Order } from '@/domain/entities/Order';
 
 // Tipado fuerte — drift con Domain Entities es error de compilación
 type ScenarioFixtures = {
-  user: User
-  orders: Order[]
-}
+  user: User;
+  orders: Order[];
+};
 
 export const scenarios: Record<string, ScenarioFixtures> = {
-  'new-user':       { user: userNominal,   orders: ordersEmpty   },
-  'returning-user': { user: userNominal,   orders: ordersPending },
-  'suspended':      { user: userSuspended, orders: ordersEmpty   },
-  'payment-failed': { user: userNominal,   orders: ordersFailed  },
-} as const
+  'new-user': { user: userNominal, orders: ordersEmpty },
+  'returning-user': { user: userNominal, orders: ordersPending },
+  suspended: { user: userSuspended, orders: ordersEmpty },
+  'payment-failed': { user: userNominal, orders: ordersFailed },
+} as const;
 
-export type ScenarioKey = keyof typeof scenarios
+export type ScenarioKey = keyof typeof scenarios;
 ```
 
 ### 2. `src/app/api/__mock__/[resource]/route.ts`
+
 ```ts
-import { NextRequest } from 'next/server'
-import { scenarios } from '@/mocks/scenarios/scenarios.registry'
+import { NextRequest } from 'next/server';
+import { scenarios } from '@/mocks/scenarios/scenarios.registry';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { resource: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { resource: string } }) {
   // Scenario comunicado via header — seteado por dev toolbar en la UI
-  const scenario = req.headers.get('x-mock-scenario') ?? 'new-user'
-  const fixture = scenarios[scenario as keyof typeof scenarios]
+  const scenario = req.headers.get('x-mock-scenario') ?? 'new-user';
+  const fixture = scenarios[scenario as keyof typeof scenarios];
 
-  if (!fixture)
-    return Response.json({ error: `Unknown scenario: ${scenario}` }, { status: 404 })
+  if (!fixture) return Response.json({ error: `Unknown scenario: ${scenario}` }, { status: 404 });
 
-  const data = fixture[params.resource as keyof typeof fixture]
+  const data = fixture[params.resource as keyof typeof fixture];
 
   if (!data)
-    return Response.json({ error: `Unknown resource: ${params.resource}` }, { status: 404 })
+    return Response.json({ error: `Unknown resource: ${params.resource}` }, { status: 404 });
 
   // Simular latencia realista en dev
   if (process.env.NODE_ENV === 'development')
-    await new Promise(r => setTimeout(r, Math.random() * 400 + 100))
+    await new Promise(r => setTimeout(r, Math.random() * 400 + 100));
 
-  return Response.json(data)
+  return Response.json(data);
 }
 ```
 
 ### 3. `src/infrastructure/api/client.ts` (único cambio)
+
 ```ts
-const MOCK_MODE = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+const MOCK_MODE = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 const BASE_URL = MOCK_MODE
-  ? '/api/__mock__'   // → Route Handler
-  : process.env.NEXT_PUBLIC_API_URL  // → real backend
+  ? '/api/__mock__' // → Route Handler
+  : process.env.NEXT_PUBLIC_API_URL; // → real backend
 
 export const apiClient = {
   get: <T>(resource: string, scenario?: string): Promise<T> =>
     fetch(`${BASE_URL}/${resource}`, {
       headers: scenario ? { 'x-mock-scenario': scenario } : {},
     }).then(r => r.json()) as Promise<T>,
-}
+};
 ```
 
 ### Middleware Guard (seguridad)
+
 ```ts
 // src/middleware.ts
 export function middleware(req: NextRequest) {
-  const isMockRoute = req.nextUrl.pathname.startsWith('/api/__mock__')
-  const isMockEnabled = process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+  const isMockRoute = req.nextUrl.pathname.startsWith('/api/__mock__');
+  const isMockEnabled = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
-  if (isMockRoute && !isMockEnabled)
-    return Response.json({ error: 'Not found' }, { status: 404 })
+  if (isMockRoute && !isMockEnabled) return Response.json({ error: 'Not found' }, { status: 404 });
 }
 ```
 
@@ -157,7 +157,7 @@ export function middleware(req: NextRequest) {
 Cada escenario compone fixtures existentes — no necesita nuevos endpoints:
 
 | Scenario key     | Descripción                                          |
-|------------------|------------------------------------------------------|
+| ---------------- | ---------------------------------------------------- |
 | `new-user`       | Primera vez, sin pedidos, flujo de onboarding activo |
 | `returning-user` | Usuario activo con historial completo y carrito      |
 | `suspended`      | Cuenta suspendida — tests de estados de acceso       |
@@ -169,13 +169,13 @@ Para agregar un nuevo escenario: solo añadir entrada en `scenarios.registry.ts`
 
 ## IMPACTO EN CAPAS (Clean Architecture)
 
-| Capa           | Cambio requerido                                      |
-|----------------|-------------------------------------------------------|
-| Domain         | Ninguno. Fixtures se tipan contra Domain Entities.    |
-| Infrastructure | Un cambio en `BASE_URL` de `client.ts`.               |
-| Application    | Ninguno. Hooks reciben el mismo Entity tipado.        |
-| UI             | Opcional: Scenario Switcher atom oculto tras env flag.|
-| mocks/         | Dueño de toda la lógica de simulación.                |
+| Capa           | Cambio requerido                                       |
+| -------------- | ------------------------------------------------------ |
+| Domain         | Ninguno. Fixtures se tipan contra Domain Entities.     |
+| Infrastructure | Un cambio en `BASE_URL` de `client.ts`.                |
+| Application    | Ninguno. Hooks reciben el mismo Entity tipado.         |
+| UI             | Opcional: Scenario Switcher atom oculto tras env flag. |
+| mocks/         | Dueño de toda la lógica de simulación.                 |
 
 ---
 
@@ -195,12 +195,12 @@ Cuando revises si el patrón está bien implementado:
 
 ## MSW SIGUE USÁNDOSE EN TESTS
 
-| Contexto                     | Herramienta             |
-|------------------------------|-------------------------|
-| Unit & integration tests     | MSW (jest/vitest)       |
-| Component tests              | MSW + @testing-library  |
-| Runtime dev / staging        | Route Handlers          |
-| E2E (Cypress/Playwright)     | Route Handlers          |
+| Contexto                 | Herramienta            |
+| ------------------------ | ---------------------- |
+| Unit & integration tests | MSW (jest/vitest)      |
+| Component tests          | MSW + @testing-library |
+| Runtime dev / staging    | Route Handlers         |
+| E2E (Cypress/Playwright) | Route Handlers         |
 
 Ambas herramientas importan los mismos `fixtures/` de `src/mocks/`.
 Un fix en un fixture se refleja en tests y en runtime simulation simultáneamente.
