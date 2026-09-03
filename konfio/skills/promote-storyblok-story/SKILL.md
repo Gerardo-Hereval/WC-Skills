@@ -92,10 +92,25 @@ deployment. Promote when the blocks are there.
 
 ## Workflow
 
+### The short way — paste the editor URL
+
 ```bash
 cd konfio/skills/promote-storyblok-story/scripts
 source ~/.zshrc            # STORYBLOK_TOKEN
 
+./promote-from-url.sh 'https://app.storyblok.com/#/me/spaces/1023897/stories/0/0/215835417873378'
+```
+
+It reads the space and story id out of the URL and keeps everything the same:
+slug, folder, and published state (published in dev -> published in prod). It
+mirrors the story's assets into the target space for you. **Dry run unless you
+pass `--apply`.**
+
+Flags: `--apply`, `--target <space_id>`, `--asset-folder-id <id>`.
+
+### The explicit way — spell out the spaces
+
+```bash
 # 1. Is the target ready? Fails loudly when it is not.
 ./preflight.sh 1023897 567724046872094 konfio-app-web/dashboard/solicitud/<slug>
 
@@ -110,9 +125,21 @@ source ~/.zshrc            # STORYBLOK_TOKEN
 every component the story uses exists in the target, the parent folder exists,
 the slug is free, and which assets still point at the source CDN.
 
+`preflight.sh` also blocks when the target story already **exists**: this skill
+only creates. Update it in the editor, or delete it and re-promote.
+
 `MISSING in source` means the source space has no such story. Before assuming a
 typo in the slug, check whether the content was ever captured in dev — a story
 that was only ever built as a local mock does not exist in Storyblok at all.
+
+`upload-assets.py` mirrors the story's assets into the target: it reuses a target
+asset when one already has the same **basename**, and otherwise runs Storyblok's
+3-step signed upload (create record -> POST to S3 -> `finish_upload`).
+
+> Reuse is by filename, so an asset that exists in the target under a *different*
+> name gets uploaded again as a duplicate. `check.svg` in dev and
+> `circle-with-check-edb85f35.svg` in prod are the same glyph and will not match.
+> Check the target folder first when that matters, and pass `--asset-map` by hand.
 
 `build-payload.py` rewrites everything that is space-scoped: `parent_id`, a fresh
 `_uid` for every block, asset ids and filenames via `--asset-map`, and it drops
