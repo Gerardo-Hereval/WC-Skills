@@ -21,6 +21,7 @@ El workdir por defecto es /tmp/review-<iid>/. Override con REVIEW_DIR.
 """
 
 import json
+import shutil
 import os
 import sys
 import urllib.error
@@ -198,6 +199,8 @@ def cmd_files(mr_url, extra):
     with open(pj) as f:
         paths = json.load(f)
     head = os.path.join(m["workdir"], "head")
+    if not extra and os.path.isdir(head):
+        shutil.rmtree(head)
     os.makedirs(head, exist_ok=True)
     for p in list(paths) + list(extra):
         enc = urllib.parse.quote(p, safe="")
