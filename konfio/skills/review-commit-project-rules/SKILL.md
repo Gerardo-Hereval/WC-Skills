@@ -83,8 +83,15 @@ Lo que sí hay que revisar:
 
 ---
 
+## REGLAS DE INTEGRACIÓN CMS
+
+- **No usar mocks locales para CMS — usar datos de Storyblok.** Es lo esperado para todas las integraciones de CMS. Marcar cualquier gate nuevo tipo `isLocalCmsMockEnabled()` o story mock local cableado a un getter de CMS; en e2e, interceptar `/cdn/stories/*` con un fixture en lugar de depender de la rama de mock local de la app. (Regla original: "Do not use local mocks for cms, use data from Storyblok. That is what we expect for all integrations on CMS.")
+
+---
+
 ## REGLAS DE TESTS
 
+- **Tests deterministas — el mismo comportamiento en todos los ambientes.** No importa si es development o production: el request debe ocurrir. Modificar variables de entorno en un test solo evidencia que el código reacciona distinto según el ambiente. No mutar `process.env` en tests y asegurar comportamiento idéntico en todos los ambientes; marcar código que bifurca por `NODE_ENV` / `NEXT_PUBLIC_VERCEL_TARGET_ENV` / flags de mock, y tests que solo pasan en un ambiente. (Regla original: "Tests should be deterministic; it does not matter if it is in development or production. The request should happen… Do not modify environment variables and ensure behavior is the same for all the environments.")
 - **Cobertura por capa (pirámide):** los **unit tests** se escriben de "hooks para abajo" — hooks (`application/hooks/**`), services/adapters (`application/services/**`, `application/adapters/**`), schemas y utils/constantes de dominio (`domain/**`), que es donde vive la lógica (validación, state-machines, mapeos). Los componentes de **UI (organisms / molecules / atoms) NO llevan unit tests de render**; se cubren con **integración / e2e**. Si un MR agrega un unit test de render sobre un componente de UI, es un HALLAZGO (desviación de la convención).
 - **E2E: solo el happy path**, salvo que el ticket pida explícitamente casos de error.
 - Descripciones `it(...)` / `describe(...)` en español — deben estar en inglés
