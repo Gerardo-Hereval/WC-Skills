@@ -21,7 +21,8 @@ wc-skills/
 │   └── skills/                       # amplitude-events, clean-arch-review, component-spec,
 │                                     # review-commit-project-rules, runtime-mock, shadcn-ui,
 │                                     # test-e2e, audit-konfio-libraries,
-│                                     # migrate-konfio-design-system
+│                                     # migrate-konfio-design-system,
+│                                     # diagnose-nds-styles
 └── scripts/                          # Scripts que se instalan en su repo destino
     └── block-library/download-component.sh
 ```
@@ -456,6 +457,20 @@ Migración **resumible** de `apps/<app>` de `@kui/design-system` (workspace) a `
 
 ```
 /migrate-konfio-design-system apps/payments
+```
+
+---
+
+#### `diagnose-nds-styles`
+
+Diagnóstico por capas (versión instalada → clase que emite el SDK → `@source` → resolución de tokens → prueba en navegador) cuando un componente de `@konfio/design-system` se ve transparente, sin borde o con el color equivocado en una app ya migrada. Corta de raíz los parches `bg-white` sobre componentes del SDK y los bumps de versión que no arreglan nada.
+
+**Cuándo usarlo:** "se ve transparente", "le falta un token", "hay que sincronizar el SDK", o antes de tocar `globals.css` por un bug visual.
+
+**Archivo:** [`konfio/skills/diagnose-nds-styles/SKILL.md`](konfio/skills/diagnose-nds-styles/SKILL.md)
+
+```
+/diagnose-nds-styles apps/payments logo-upload-modal
 ```
 
 ---
