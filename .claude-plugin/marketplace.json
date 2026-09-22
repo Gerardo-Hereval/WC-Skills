@@ -22,7 +22,7 @@
     {
       "name": "wc-konfio-skills",
       "source": "./konfio",
-      "description": "Skills for the konfio-app-web monorepo: /amplitude-events, /clean-arch-review, /shadcn-ui, /runtime-mock, /component-spec, /test-e2e, /audit-konfio-libraries, /migrate-konfio-design-system, /diagnose-nds-styles and the review-commit project rules.",
+      "description": "Skills for the konfio-app-web monorepo: /amplitude-events, /clean-arch-review, /shadcn-ui, /runtime-mock, /component-spec, /test-e2e, /audit-konfio-libraries, /migrate-konfio-design-system, /diagnose-nds-styles, /monitor-temporal-workflows and the review-commit project rules.",
       "category": "engineering",
       "keywords": [
         "konfio",

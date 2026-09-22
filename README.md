@@ -22,7 +22,8 @@ wc-skills/
 │                                     # review-commit-project-rules, runtime-mock, shadcn-ui,
 │                                     # test-e2e, audit-konfio-libraries,
 │                                     # migrate-konfio-design-system,
-│                                     # diagnose-nds-styles
+│                                     # diagnose-nds-styles,
+│                                     # monitor-temporal-workflows
 └── scripts/                          # Scripts que se instalan en su repo destino
     └── block-library/download-component.sh
 ```
@@ -471,6 +472,20 @@ Diagnóstico por capas (versión instalada → clase que emite el SDK → `@sour
 
 ```
 /diagnose-nds-styles apps/payments logo-upload-modal
+```
+
+---
+
+#### `monitor-temporal-workflows`
+
+Consulta el estado de workflows de Temporal del funnel WC (Former OD `wc-ondemand` 60/61, XSell 62/63, primer crédito `wc-ftl` 1/5) por `applicationId`, en dev o prod, con loop y flags de rechazo/error. Detecta el motivo mecánico de un rechazo (oferta WC vacía) y apunta a dónde está el motivo de negocio (core: rejection-reasons / CloudWatch / BD). El token es de la sesión del usuario, vive ~5 min y nunca se guarda.
+
+**Cuándo usarlo:** "monitorear", "ver el estado", "en qué va", "validar estatus" o "por qué se rechazó" una solicitud por su appId o actor id (ej. `2719676_wc-ondemand@1.0.0`).
+
+**Archivo:** [`konfio/skills/monitor-temporal-workflows/SKILL.md`](konfio/skills/monitor-temporal-workflows/SKILL.md)
+
+```
+python konfio/skills/monitor-temporal-workflows/scripts/monitor_temporal_apps.py --env prd --token <TOKEN> --apps 2719676,2719854 --interval 30
 ```
 
 ---
