@@ -9,6 +9,10 @@ También sirve para wc-ftl@1.0.0 (primer crédito, tipos 1/5) con --machine.
 Uso:
   python monitor_temporal_apps.py --env prd --token <TOKEN> --apps 2719676,2719854 --interval 30
   python monitor_temporal_apps.py --env dev --token <TOKEN> --apps 2714684 --cycles 1 --output full
+  python monitor_temporal_apps.py --env prd --token <TOKEN> --apps-file ~/Downloads/workflows-78.json --cycles 1
+
+--apps-file acepta el export JSON de la UI de Temporal ({"workflows":[{"id":"<app>_<machine>",...}]}),
+una lista JSON de ids, o un archivo de texto con ids separados por coma/espacio/salto de línea.
 
 Token:
   - prd: JWT de tu sesión de platform.konfio.mx (aud api.konfio.mx). Vive ~5 min.
@@ -29,6 +33,9 @@ Flags:
   [401]       token expirado -> refresca el token.
 """
 import argparse
+import json
+import os
+import re
 import sys
 import time
 
@@ -49,6 +56,20 @@ def fetch(app_id: int, machine: str, base_url: str, token: str) -> dict:
     except Exception:
         out["body"] = {"raw": r.text[:200]}
     return out
+
+
+def load_apps_file(path: str) -> list[int]:
+    text = open(os.path.expanduser(path), encoding="utf-8").read()
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return [int(x) for x in re.findall(r"\d+", text)]
+    items = data.get("workflows", []) if isinstance(data, dict) else data
+    ids = []
+    for item in items:
+        raw = item.get("id") if isinstance(item, dict) else item
+        ids.append(int(str(raw).split("_", 1)[0]))
+    return ids
 
 
 def summarize(app_id: int, res: dict) -> str:
@@ -93,7 +114,8 @@ def main() -> None:
     p = argparse.ArgumentParser(description="Monitorea estados de workflows Temporal por app ID")
     p.add_argument("--env", choices=["dev", "prd"], default="prd")
     p.add_argument("--token", required=True, help="Bearer (con o sin 'Bearer ')")
-    p.add_argument("--apps", required=True, help="IDs separados por coma, ej. 2719676,2719854")
+    p.add_argument("--apps", help="IDs separados por coma, ej. 2719676,2719854")
+    p.add_argument("--apps-file", help="archivo con IDs: export JSON de Temporal, lista JSON o texto")
     p.add_argument("--machine", default="wc-ondemand@1.0.0", help="máquina@version (def wc-ondemand@1.0.0)")
     p.add_argument("--interval", type=int, default=30, help="segundos entre ciclos (def 30)")
     p.add_argument("--cycles", type=int, default=0, help="0 = infinito (def 0)")
@@ -102,7 +124,12 @@ def main() -> None:
 
     token = args.token[len("Bearer "):] if args.token.startswith("Bearer ") else args.token
     base_url = build_base_url(args.env)
-    apps = [int(x) for x in args.apps.replace(" ", "").split(",") if x]
+    apps = [int(x) for x in (args.apps or "").replace(" ", "").split(",") if x]
+    if args.apps_file:
+        apps += load_apps_file(args.apps_file)
+    apps = list(dict.fromkeys(apps))
+    if not apps:
+        p.error("indica --apps y/o --apps-file")
 
     print(f"env={args.env}  machine={args.machine}  apps={apps}  interval={args.interval}s")
     print("-" * 90)
@@ -121,7 +148,6 @@ def main() -> None:
                 continue
             print(summarize(app_id, res))
             if args.output == "full" and res["status"] == 200 and res["body"].get("data"):
-                import json
                 print(json.dumps(res["body"]["data"].get("context", {}).get("data", {}), indent=2, ensure_ascii=False))
             st = res["status"]
             body = res["body"]
