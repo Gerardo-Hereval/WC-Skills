@@ -62,6 +62,7 @@ class Caso:
     negociaciones: list
     lf_sobre_max: bool
     problemas: list
+    new_money: Optional[float] = None
 
 
 def _parsear_negociaciones(texto: Optional[str]) -> list:
@@ -93,7 +94,9 @@ def analizar(r: dict) -> Caso:
         lf_base = round(lf_total / (1 + IVA) if con_iva else lf_total, 2)
     notional = f(r["notional"])
     es_topup = rec == "T" and (tipo_id is None or tipo_id in TIPOS_TOPUP)
-    base_calculo = notional - (f(r.get("liq")) or 0) if es_topup else notional
+    liq = f(r.get("liq"))
+    new_money = f(r.get("new_money"))
+    base_calculo = (new_money if new_money is not None else notional - (liq or 0)) if es_topup else notional
     debio = round(pct * base_calculo * (1 + IVA if con_iva else 1), 2)
     depositado = f(r.get("depositado"))
     cobrado = None if depositado is None else round(base_calculo - depositado, 2)
@@ -105,6 +108,10 @@ def analizar(r: dict) -> Caso:
     lf_sobre_max = bool(max_n and notional != max_n and lf_base is not None and abs(lf_base - round(pct * max_n, 2)) < 1 and not negs)
     fee_paid = f(r.get("fee_paid"))
     problemas = []
+    if es_topup and new_money is not None and liq is not None and not igual(new_money, notional - liq):
+        problemas.append(f"roa.new_money {m(new_money)} ≠ notional − liquidación {m(notional - liq)}")
+    if es_topup and new_money is not None and f(r.get("roa_disburse")) is not None and f(r.get("roa_fee")) is not None and not igual(f(r.get("roa_disburse")), new_money - f(r.get("roa_fee"))):
+        problemas.append(f"roa.amount_to_disburse {m(f(r.get('roa_disburse')))} ≠ new_money − roa.fee_amount {m(new_money - f(r.get('roa_fee')))}")
     if cobrado is not None and not igual(cobrado, debio):
         problemas.append(f"cobro {m(cobrado)} ≠ esperado {m(debio)}" + (" (LOAN_FEE sobre el monto máximo, caso onboarding)" if lf_sobre_max else ""))
     if lf_sobre_max and cobrado is None:
@@ -123,7 +130,7 @@ def analizar(r: dict) -> Caso:
     elif depositado is not None:
         dispersado = "fecha no indicada"
     return Caso(int(r["loan"]), int(r["app"]) if r.get("app") not in (None, "") else None, r.get("tipo") or "-", rec, dispersado,
-                notional, max_n, f(r.get("notional_sel")), pct, con_iva, lf_total, debio, cobrado, factura, fee_paid, negs, lf_sobre_max, problemas)
+                notional, max_n, f(r.get("notional_sel")), pct, con_iva, lf_total, debio, cobrado, factura, fee_paid, negs, lf_sobre_max, problemas, new_money)
 
 
 def imprimir(c: Caso) -> str:
@@ -139,7 +146,7 @@ def imprimir(c: Caso) -> str:
     out.append(f"- % comisión = {c.pct * 100:.2f}%, {'con IVA desglosado' if c.con_iva else 'sin IVA desglosado (IVA incluido)'}")
     if c.lf_total is not None:
         out.append(f"- Comisión registrada (LOAN_FEE) = {m(c.lf_total)}" + (" ❌ calculada sobre el monto máximo" if c.lf_sobre_max else ""))
-    base = "dinero nuevo" if c.rec == "T" else m(c.notional)
+    base = (f"dinero nuevo {m(c.new_money)} (roa.new_money)" if c.new_money is not None else "dinero nuevo") if c.rec == "T" else m(c.notional)
     out.append(f"- Monto que se debió cobrar = {c.pct * 100:.2f}% × {base}{' + IVA' if c.con_iva else ''} = {m(c.debio)}")
     if c.cobrado is not None:
         out.append(f"- Monto cobrado = {m(c.cobrado)} {'✅' if igual(c.cobrado, c.debio) else '❌'}")

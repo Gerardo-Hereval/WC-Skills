@@ -32,6 +32,7 @@ Reglas (acordadas con el lead, 2026-10):
 - **Convención de IVA**: si las filas activas de `LOAN_FEE` traen `fee_iva_amount` 0, el porcentaje ya incluye el IVA; si traen IVA, va encima. No se compara contra el contrato.
 - **Qué factura la lambda**: `roa.fee_amount` en TopUp/Former; `INITIAL_PAYMENT.fee_paid` en el resto.
 - **Comisión sobre el monto correcto**: `LOAN_FEE.fee_amount_base` debe ser `fee_percent × LOAN.NOTIONAL`. Si coincide con `fee_percent × max_notional` y el notional es menor, es el caso 488197 (onboarding no recalcula).
+- **Dinero nuevo (TopUp)**: desde el 2026-10-07 la roa guarda `new_money` = `notional − (principal_due + interest_due)` del crédito anterior; es la base de la comisión. Se valida que coincida con esa resta y que `amount_to_disburse = new_money − fee_amount`. Las roas anteriores a esa fecha traen `new_money` NULL y se sigue usando `notional − liq`.
 - **Notional mayor al elegido**: si hay negociación de Salesforce con el notional como parámetro, el +3% es el tope de la regla y es válido.
 
 ## Cómo obtener los datos (tres modos, según el acceso que tenga quien valida)
@@ -57,7 +58,7 @@ python3 <skill>/scripts/validar_comisiones.py --datos ~/Downloads/datos_comision
 python3 <skill>/scripts/validar_comisiones.py --manual "loan=...,notional=...,pct=...,con_iva=1,lf_total=...,depositado=...,fee_paid=...,factura_total=..."
 ```
 
-Campos del modo manual: obligatorios `loan`, `notional`, `pct` (acepta 5.17 o 0.0517), `depositado`, `lf_total`; opcionales `con_iva` (1/0; sin él se asume incluido), `fee_paid`, `factura_total`, `factura_subtotal`, `factura_iva`, `max_notional`, `notional_sel`, `liq` (TopUp: liquidación del crédito anterior), `rec` (T/F), `app`, `tipo`. Si alguien pasa cifras de pantalla, pídele notional, depósito de Kanto y la comisión registrada; con eso ya sale el veredicto de cobro.
+Campos del modo manual: obligatorios `loan`, `notional`, `pct` (acepta 5.17 o 0.0517), `depositado`, `lf_total`; opcionales `con_iva` (1/0; sin él se asume incluido), `fee_paid`, `factura_total`, `factura_subtotal`, `factura_iva`, `max_notional`, `notional_sel`, `liq` (TopUp: liquidación del crédito anterior), `new_money` (TopUp: `roa.new_money`; si viene se usa como base en lugar de notional − liq), `rec` (T/F), `app`, `tipo`. Si alguien pasa cifras de pantalla, pídele notional, depósito de Kanto y la comisión registrada; con eso ya sale el veredicto de cobro.
 
 `--fecha` y la consulta toman los créditos con depósito de Kanto completado ese día (CDMX). `--solo-problemas` oculta los ✅. `--tsv` guarda la tabla.
 
