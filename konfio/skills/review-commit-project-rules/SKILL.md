@@ -33,6 +33,7 @@ Estas reglas se combinan con las reglas genéricas del skill global `/review-com
 ### Contextos y hooks de aplicación
 
 - **Optional chaining especulativo en valores garantizados por el contexto de auth** — en rutas autenticadas, `userInfo` (y análogos provenientes de `useUserInfoContext`) está garantizado por el middleware de autenticación; usar `userInfo?.enterprise.role` introduce un path `undefined` que nunca ocurre en producción y engaña al compilador sobre la presencia del dato. Usar `userInfo.enterprise.role` directamente
+- **Optional chaining o `?? ''` sobre campos que el tipo declara requeridos** — si la interfaz de dominio define el campo como requerido (ej. `openingFee: FinancialMetricDomain`, `text: string`), `offer.openingFee?.formattedValue` o `offer.rate.text ?? ''` es código especulativo: acceder directo. Es **blocker** cuando el mismo valor se pasa como requerido a una función en la línea vecina (`buildFeeLabel(cms, offer.openingFee)` junto a `offer.openingFee?.formattedValue`): la inconsistencia sugiere que puede ser `undefined` y que la función truena. Si el campo de verdad puede faltar, corregir el tipo y validar en la frontera (adapter/schema), no defenderse río abajo
 
 ---
 
@@ -86,6 +87,7 @@ Lo que sí hay que revisar:
 ## REGLAS DE INTEGRACIÓN CMS
 
 - **No usar mocks locales para CMS — usar datos de Storyblok.** Es lo esperado para todas las integraciones de CMS. Marcar cualquier gate nuevo tipo `isLocalCmsMockEnabled()` o story mock local cableado a un getter de CMS; en e2e, interceptar `/cdn/stories/*` con un fixture en lugar de depender de la rama de mock local de la app. (Regla original: "Do not use local mocks for cms, use data from Storyblok. That is what we expect for all integrations on CMS.")
+- **Sin fallbacks cuando falta el bloque CMS** — marcar `cms ? buildItems(cms) : []`, `cms?.title ?? 'Copy literal'` o cualquier rama que pinte el componente con contenido vacío o copy hardcodeado cuando el bloque CMS no llegó: esconde el problema de Storyblok en vez de evidenciarlo. Si el bloque es requerido, no montar el componente hasta tenerlo (`{offer && cms && (<Drawer … />)}`) y usar `cms.campo` sin `?.`; los builders pueden lanzar error si faltan items. No aplica a `?? 'copy'` heredado que el MR no toca
 
 ---
 
