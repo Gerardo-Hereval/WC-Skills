@@ -23,7 +23,8 @@ wc-skills/
 │                                     # test-e2e, audit-konfio-libraries,
 │                                     # migrate-konfio-design-system,
 │                                     # diagnose-nds-styles,
-│                                     # monitor-temporal-workflows
+│                                     # monitor-temporal-workflows,
+│                                     # delivering-slack-change-requests
 └── scripts/                          # Scripts que se instalan en su repo destino
     └── block-library/download-component.sh
 ```
@@ -612,6 +613,30 @@ Se instalan a través del plugin marketplace de Claude Code:
 ```
 superpowers       → claude-plugins-official/superpowers
 frontend-design   → claude-plugins-official/frontend-design
+```
+
+---
+
+#### `delivering-slack-change-requests`
+
+Lleva un pedido de cambio que llega por Slack ("¿tu bot puede rifarse un cambio?") hasta el MR mergeado, en 8 fases con sus puntos de control:
+1. Acuse en el canal.
+2. Explorar el código y resolver las dudas que el código contesta.
+3. Preview de la propuesta a quien autoriza y envío al canal.
+4. Tarea en Pendientes.
+5. TDD, buscando a todos los que llaman a lo que cambia y con lint/typecheck como el pipeline.
+6. MR compartido en el canal.
+7. Monitoreo del canal y del MR: contestar en hilo con archivo:línea, `DONE:` + "Comentario atendido ✅", recordatorio solo si no se ha mergeado.
+8. Cierre en Notion y en memoria.
+
+Lo que ya se delegó no se vuelve a preguntar. Lo que pide el lead se verifica igual que todo lo demás. Los cron de sesión se respaldan en Pendientes para recrearlos. Las convenciones de Konfío están en una sección aparte, para poder portarlo a un bot.
+
+**Cuándo usarlo:** alguien del equipo pide un cambio en un canal o DM ("revisa este canal"), o hay que retomar uno de estos pedidos a medias.
+
+**Archivo:** [`konfio/skills/delivering-slack-change-requests/SKILL.md`](konfio/skills/delivering-slack-change-requests/SKILL.md)
+
+```
+/delivering-slack-change-requests https://konfio-grid.enterprise.slack.com/archives/<canal>
 ```
 
 ---
