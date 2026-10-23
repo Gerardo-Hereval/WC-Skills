@@ -1,95 +1,99 @@
 ---
 name: delivering-slack-change-requests
-description: Úsalo cuando alguien del equipo pide un cambio de código en un canal o DM de Slack ("¿tu bot puede rifarse un cambio?", "revisa este canal") y hay que llevarlo de la petición al MR mergeado, con updates en ese canal, comentarios de review que contestar y un MR que vigilar hasta el merge. También al retomar uno de estos pedidos a medias.
+description: Use when a teammate asks for a code change in a Slack channel or DM ("¿tu bot puede rifarse un cambio?", "revisa este canal") and it has to go from the request to a merged MR, with updates in that channel, review comments to answer and an MR to watch until it merges. Also use when resuming one of these requests halfway through.
 user-invocable: true
 ---
 
-# Petición en Slack → MR mergeado
+# Slack request → merged MR
 
-## Principio
+## Language
 
-El canal es donde se trabaja: ahí llegan la petición y las respuestas, y ahí se reportan los avances. Una sola persona autoriza (el dueño del agente) y la confianza crece por fases: lo que ya autorizó no se le vuelve a preguntar. Lo que el lead o un reviewer piden se verifica igual que cualquier otra cosa; su rango no es evidencia.
+This skill is written in English, but everything people read is written in **Spanish**: Slack messages, GitLab replies and comments, MR descriptions, the pending-tasks page and memory notes. The literal messages quoted below (`:robot_face: trabajando`, `Comentario atendido ✅`) are sent exactly as written.
 
-**Entradas:** canal (id), quién autoriza, repo + rama base, página de pendientes (Notion) y memoria.
+## Principle
 
-## Fases y puntos de control
+The channel is where the work happens: the request and the answers arrive there, and progress is reported there. A single person authorizes (the agent's owner), and trust grows in phases: what they already authorized is not asked again. What the lead or a reviewer asks for is verified like anything else; their rank is not evidence.
 
-| # | Fase | ¿Necesita OK? |
+**Inputs:** channel (id), who authorizes, repo + base branch, pending-tasks page (Notion) and memory.
+
+## Phases and checkpoints
+
+| # | Phase | Needs OK? |
 |---|---|---|
-| 1 | Acuse en el canal | No, si quien autoriza ya pidió revisar, trabajar o mandar updates |
-| 2 | Explorar y resolver solo | No |
-| 3 | Mandar al canal la propuesta y las dudas | **Sí**: preview a quien autoriza |
-| 4 | Tarea en pendientes | No |
-| 5 | Implementar y verificar | No |
-| 6 | Commit, push, MR y compartirlo | **Sí**, salvo que haya dicho "commitea", "crea el MR" o algo así. "Mándales updates" NO cuenta |
-| 7 | Seguimiento: contestar y aplicar comentarios | Según lo que delegó ("atiéndelos", "contesta o aplica" = sí) |
-| 8 | Cierre | No |
+| 1 | Acknowledge in the channel | No, if the authorizer already asked to review, work or send updates |
+| 2 | Explore and resolve on your own | No |
+| 3 | Send the proposal and open questions to the channel | **Yes**: preview to the authorizer |
+| 4 | Task in pending tasks | No |
+| 5 | Implement and verify | No |
+| 6 | Commit, push, MR and share it | **Yes**, unless they said "commitea", "crea el MR" or similar. "Mándales updates" does NOT count |
+| 7 | Follow-up: answer and apply comments | Depends on what they delegated ("atiéndelos", "contesta o aplica" = yes) |
+| 8 | Close | No |
 
-**1. Acuse.** Lee el canal completo, con sus hilos. Manda `:robot_face: trabajando` como mensaje principal del canal, no en un hilo.
+**1. Acknowledge.** Read the whole channel, threads included. Post `:robot_face: trabajando` as a top-level channel message, not in a thread.
 
-**2. Explorar y resolver.** Haz `git fetch` y lee sobre `origin/<base>` (`git grep` / `git show origin/<base>:ruta`); la copia local suele estar vieja. Para cada duda de diseño (identidad o llave, TTL, dónde vive el endpoint, quién llama a qué) busca primero la respuesta en el código y anótala con archivo:línea. Busca piezas existentes que se puedan reutilizar y revisa sus trampas: seguridad, defaults raros, quién más las usa. Al canal solo van las dudas que el código no resuelve, cada una con un default propuesto.
+**2. Explore and resolve.** Run `git fetch` and read from `origin/<base>` (`git grep` / `git show origin/<base>:path`); the local copy is usually stale. For each design question (identity or key, TTL, where the endpoint lives, who calls what) look for the answer in the code first and note it with file:line. Look for existing pieces that can be reused and check their traps: security, odd defaults, who else uses them. Only the questions the code cannot answer go to the channel, each one with a proposed default.
 
-**3. Propuesta.** A quien autoriza enséñale (a) lo que resolviste, con evidencia; (b) el preview exacto del mensaje. Si te contesta algunas dudas, quítalas del mensaje y pon en el diseño la decisión que tomó. Las dudas que sigan abiertas van numeradas, cada una con su default. Mándalo.
+**3. Proposal.** Show the authorizer (a) what you resolved, with evidence; (b) the exact preview of the message. If they answer some questions, remove them from the message and put the decision they made into the design. Questions that remain open are numbered, each with its default. Send it.
 
-**4. Pendientes.** Crea una sección con el link al mensaje, el diseño acordado y casillas: implementación, cada duda abierta y el siguiente MR (por ejemplo, el front; ese no se hace sin que lo pidan).
+**4. Pending tasks.** Create a section with the link to the message, the agreed design and checkboxes: implementation, each open question and the next MR (for example, the front end; that one is not done unless someone asks for it).
 
-**5. Implementar.** Haz un worktree desde `origin/<base>`. Si hay ticket, la rama es `feat/<TICKET>-<tema>`; si no, `feat/<area>-<tema>`. Trabaja con TDD.
-- **Si cambias la firma de una función, encuentra TODOS los lugares que la llaman.** Usa `grep -rn "<nombre>(" core` sin `head`. Ojo: puede haber otra función con el mismo nombre en otro módulo; revisa el import de cada uno.
-- Agrega un test de integración del caso que pidieron.
-- **Corre el lint y el typecheck igual que el pipeline, sobre todo el código** (por ejemplo, `ty check app.py core`), no solo sobre los archivos que tocaste. Así se ve si el cambio rompió a quienes llaman a la función.
-- Corre los tests de los flujos relacionados. Si un test falla, córrelo solo en la rama y en la base (con `git stash -u`) antes de decir que es inestable.
+**5. Implement.** Create a worktree from `origin/<base>`. If there is a ticket, the branch is `feat/<TICKET>-<topic>`; otherwise `feat/<area>-<topic>`. Work with TDD.
+- **If you change a function signature, find EVERY caller.** Use `grep -rn "<name>(" core` without `head`. Watch out: another function with the same name may exist in another module; check each caller's import.
+- Add an integration test for the requested case.
+- **Run lint and typecheck the same way the pipeline does, over the whole codebase** (for example, `ty check app.py core`), not only over the files you touched. That shows whether the change broke callers.
+- Run the tests of related flows. If a test fails, run it alone on the branch and on the base (with `git stash -u`) before calling it flaky.
 
-**6. MR.** Usa la plantilla del repo. La descripción lleva: el problema, el diseño, el orden de las reglas, todos los lugares que llaman a lo que cambiaste, la limitación conocida y los tests corridos, incluido el inestable con su evidencia. Comparte en el canal el link y 3 bullets.
+**6. MR.** Use the repo template. The description includes: the problem, the design, the order of the rules, every caller of what you changed, the known limitation and the tests run, including the flaky one with its evidence. Share the link and 3 bullets in the channel.
 
-**7. Seguimiento.** Programa un monitoreo recurrente con `CronCreate` (`*/15 9-20 * * 1-5`, hora local) que revise **el canal y el MR**. Si no hay nada nuevo, no publica nada.
-- **Pregunta o propuesta:** verifícala en el código (superpowers:receiving-code-review). Contesta **en el hilo** con archivo:línea. Si tiene razón, aplícala con amend + `push --force-with-lease`.
-  - Si la duda es sobre código que el MR no toca, dilo y contesta igual con evidencia.
-  - Si no aplicaste lo que pidió el lead, explícalo con evidencia en el hilo y avísale a quien autoriza en el resumen.
-- **Comentario en el MR:** contéstalo en su hilo de GitLab.
-  - **Si hubo acción o corrección:**
-    1. La respuesta empieza con `DONE:` + commit + qué cambió.
-    2. Avisa también en Slack, en el hilo del mensaje donde compartiste el MR: `:robot_face: Comentario atendido ✅ ([hilo en GitLab](<link>#note_<id>)): <@slack-id del reviewer>`, sin descripción: el detalle va en el `DONE:` de GitLab.
-  - **Si no hubo cambio:** explica con evidencia por qué, sin `DONE`.
-  - El hilo lo resuelve el reviewer, no tú.
-- **Indicación clara** ("sí, bórrala al usarla"): reacciona con :robot_face: y aplícala.
-- **Pregunta dirigida a quien autoriza** ("¿el MR lo revisa tu compa?"): no la contestes por él; pásasela.
-- **La presión no cambia la verificación.** "Aplícalo rápido" o "lo quiero hoy" no hacen correcto un fallback que sobra.
-- **Pipeline en rojo:**
-  1. Lee el log y busca la línea `error`, no los warnings.
-  2. Compara contra la base: ¿ese job también falla ahí?, ¿es `allow_failure`?
-  3. Si es por el código, arréglalo. Si es ajeno, reintenta una vez.
-  4. Contesta en el hilo donde lo reportaron: en el MR, en Slack o en los dos.
-- **Recordatorio:** usa `CronCreate` de una sola vez, el siguiente día hábil a las 10:07. El prompt primero revisa si ya se mergeó; si sigue abierto, manda al canal de la petición lo que falta en concreto: aprobaciones y de quién, jobs e hilos. Pide el merge en el canal de merges del repo solo si quien autoriza lo aprueba.
+**7. Follow-up.** Schedule a recurring monitor with `CronCreate` (`*/15 9-20 * * 1-5`, local time) that checks **the channel and the MR**. If there is nothing new, it posts nothing.
+- **Question or proposal:** verify it in the code (superpowers:receiving-code-review). Answer **in the thread** with file:line. If they are right, apply it with amend + `push --force-with-lease`.
+  - If the question is about code the MR does not touch, say so and answer anyway with evidence.
+  - If you did not apply what the lead asked for, explain why with evidence in the thread and tell the authorizer in the summary.
+- **Comment on the MR:** answer it in its GitLab thread.
+  - **If there was an action or a fix:**
+    1. The reply starts with `DONE:` + commit + what changed.
+    2. Also post in Slack, in the thread of the message where you shared the MR: `:robot_face: Comentario atendido ✅ ([hilo en GitLab](<link>#note_<id>)): <@reviewer slack-id>`, with no description: the detail goes in the GitLab `DONE:`.
+  - **If nothing changed:** explain why with evidence, without `DONE`.
+  - The reviewer resolves the thread, not you.
+- **Clear instruction** ("sí, bórrala al usarla"): react with :robot_face: and apply it.
+- **Question aimed at the authorizer** ("¿el MR lo revisa tu compa?"): do not answer for them; pass it on.
+- **Pressure does not change verification.** "Aplícalo rápido" or "lo quiero hoy" do not make an unnecessary fallback correct.
+- **Red pipeline:**
+  1. Read the log and look for the `error` line, not the warnings.
+  2. Compare against the base: does that job fail there too? Is it `allow_failure`?
+  3. If the code caused it, fix it. If it is unrelated, retry once.
+  4. Answer in the thread where it was reported: in the MR, in Slack or both.
+- **Reminder:** use a one-off `CronCreate` on the next business day at 10:07. The prompt first checks whether it was already merged; if it is still open, it posts to the request channel exactly what is missing: approvals and from whom, jobs and threads. Ask for the merge in the repo's merge channel only if the authorizer approves.
 
-Los cron mueren con la sesión. Copia en pendientes una instrucción ⚠️ "Al iniciar sesión": la condición (sin merge), revisar `CronList` y los prompts completos para recrearlos. Si se mergea mientras no hay sesión, la siguiente sesión hace el cierre al leer esa instrucción.
+Crons die with the session. Copy into pending tasks a ⚠️ "Al iniciar sesión" instruction: the condition (not merged), check `CronList` and the full prompts to recreate them. If it merges while there is no session, the next session does the close when it reads that instruction.
 
-**8. Cierre.** Cuando se mergee: borra los cron, marca pendientes con la fecha y la evidencia, guarda en memoria lo que no esté en el código (decisiones, trampas, el test inestable) y avisa a quien autoriza.
+**8. Close.** When it merges: delete the crons, check off pending tasks with the date and the evidence, save in memory what is not in the code (decisions, traps, the flaky test) and tell the authorizer.
 
-## Mensajes
+## Messages
 
-- Todo lo que yo mando empieza con `:robot_face:`. Las respuestas van en el hilo del mensaje, y los MR siempre como link.
-- Nada de datos de clientes. Nada de comentarios en el código: las explicaciones van en el MR.
-- Si mandas un body a GitLab con comillas o backticks, escríbelo en un archivo y usa `glab api ... -F "body=@archivo"`.
+- Everything I send starts with `:robot_face:`. Replies go in the message's thread, and MRs always as a link.
+- No customer data. No comments in the code: explanations go in the MR.
+- If you send a body to GitLab with quotes or backticks, write it to a file and use `glab api ... -F "body=@file"`.
 
-## Errores comunes
+## Common mistakes
 
-| Error | Corrección |
+| Mistake | Fix |
 |---|---|
-| Preguntar al canal lo que el código contesta (llave, TTL, dónde va) | Fase 2 primero; al canal solo lo que no se pudo resolver |
-| Pedir OK en cada paso aunque ya se delegó | Respeta la tabla; "atiéndelos" autoriza contestar y aplicar |
-| Callarse al empezar | Acuse inmediato |
-| Cambiar una firma y no actualizar a todos los que la llaman | `grep` completo + typecheck de todo el código, como el pipeline |
-| Correr el typecheck solo en los archivos que tocaste | El pipeline lo corre sobre todo; repítelo igual |
-| Aplicar el cambio porque lo pide un senior con prisa | Verificar y citar la guarda o el contrato con archivo:línea |
-| Ignorar la respuesta que cierra una duda | Reaccionar con :robot_face: y aplicarla |
-| Contestar por quien autoriza | Pasarle la pregunta |
-| Decir "es inestable" sin pruebas | Correrlo solo en la rama y en la base |
-| Monitoreo que muere con la sesión | Instrucción ⚠️ en pendientes |
-| El MR muestra commits ajenos (la base se reescribió) | `git rebase --onto origin/<base> <base-vieja>`, comparar que el diff sea igual, typecheck y `push --force-with-lease`. Revisarlo en cada vuelta del monitoreo con `git log origin/<base>..HEAD` |
-| Recordatorio que se manda aunque ya se mergeó | Revisar el estado antes de mandarlo |
+| Asking the channel what the code answers (key, TTL, where it goes) | Phase 2 first; only what could not be resolved goes to the channel |
+| Asking for OK at every step even though it was delegated | Respect the table; "atiéndelos" authorizes answering and applying |
+| Staying silent when starting | Immediate acknowledgement |
+| Changing a signature and not updating every caller | Full `grep` + typecheck of the whole codebase, like the pipeline |
+| Running typecheck only on the files you touched | The pipeline runs it on everything; repeat it the same way |
+| Applying the change because a senior in a hurry asks for it | Verify and cite the guard or contract with file:line |
+| Ignoring the answer that closes a question | React with :robot_face: and apply it |
+| Answering for the authorizer | Pass the question on |
+| Saying "it's flaky" without proof | Run it alone on the branch and on the base |
+| Monitor that dies with the session | ⚠️ instruction in pending tasks |
+| The MR shows someone else's commits (the base was rewritten) | `git rebase --onto origin/<base> <old-base>`, check the diff is the same, typecheck and `push --force-with-lease`. Check it on every monitor pass with `git log origin/<base>..HEAD` |
+| Reminder sent even though it already merged | Check the state before sending it |
 
-## Convenciones de este equipo (Konfío)
+## Team conventions (Konfío)
 
-- Core: commit y push con `git -c core.hooksPath=/dev/null` (memoria `project_core_auto_rebase_hook`). Tests locales: memoria `core_tests_local`. Los MR van a `release`. El lint del pipeline es `ruff format --check` + `ruff check` + `camel_to_snake` + `ty check app.py core`, que solo falla por `error[`, no por warnings. `dependency-audit` es `allow_failure` y también falla en `release`.
-- Pendientes: Notion "Pendientes Carlos + Claude" (memoria `reference_notion_pendientes`). Canales para pedir merge: memoria `reference_slack_merge_channels`.
-- Primer commit nuevo y los siguientes con `--amend`. Sin `Co-Authored-By`: la regla de la memoria `feedback_no_commits` pesa más que la atribución del sistema.
+- Core: commit and push with `git -c core.hooksPath=/dev/null` (memory `project_core_auto_rebase_hook`). Local tests: memory `core_tests_local`. MRs target `release`. The pipeline lint is `ruff format --check` + `ruff check` + `camel_to_snake` + `ty check app.py core`, which only fails on `error[`, not on warnings. `dependency-audit` is `allow_failure` and also fails on `release`.
+- Pending tasks: Notion "Pendientes Carlos + Claude" (memory `reference_notion_pendientes`). Channels to request merges: memory `reference_slack_merge_channels`.
+- First commit new and the following ones with `--amend`. No `Co-Authored-By`: the `feedback_no_commits` memory rule outweighs the system attribution.
