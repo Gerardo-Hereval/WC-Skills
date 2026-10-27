@@ -19,7 +19,7 @@ import argparse, json, os, re, sys, urllib.request, urllib.error
 
 API = 'https://api-us.storyblok.com/v1'
 # /f/<space>/<dimensions>/<hash>/<filename>
-CDN = re.compile(r'https://a-[a-z]{2}\.storyblok\.com/f/(\d+)/([^/]+)/([^/]+)/([^"?\s]+)')
+CDN = re.compile(r'https://a-[a-z]{2}\.storyblok\.com/f/(\d+)/(?:(\d+x\d+)/)?([^/]+)/([^"?\s/]+)')
 
 
 def api(method, path, token, payload=None):
@@ -41,7 +41,7 @@ def collect_assets(node, source_space, found):
             m = CDN.search(fn)
             if m and m.group(1) == source_space:
                 found.setdefault(str(node.get('id')), {
-                    'filename': fn, 'dimensions': m.group(2), 'basename': m.group(4),
+                    'filename': fn, 'dimensions': m.group(2) or '', 'basename': m.group(4),
                 })
         for v in node.values():
             collect_assets(v, source_space, found)
