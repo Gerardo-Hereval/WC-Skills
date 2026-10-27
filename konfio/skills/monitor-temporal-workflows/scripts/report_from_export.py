@@ -23,7 +23,7 @@ LONG_WAIT_H = 40
 
 
 def fetch(base, token, wid):
-    req = urllib.request.Request(f"{base}/{wid}", headers={"Authorization": f"Bearer {token}"})
+    req = urllib.request.Request(f"{base}/{wid}", headers={"Authorization": f"Bearer {token}", "User-Agent": "curl/8.7.1", "Accept": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
             return wid, 200, json.load(r)
@@ -51,7 +51,7 @@ def main():
 
     wfs = json.loads(export.read_text())["workflows"]
     meta = {w["id"]: w for w in wfs}
-    with cf.ThreadPoolExecutor(32) as ex:
+    with cf.ThreadPoolExecutor(int(os.environ.get("MTW_WORKERS", "4"))) as ex:
         results = list(ex.map(lambda w: fetch(base, token, w), meta))
 
     codes = Counter(c for _, c, _ in results)
