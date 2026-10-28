@@ -70,6 +70,31 @@ Never invent evidence. If something is missing, keep the section with an explici
 
 ---
 
+## Step 1c — Verification results (mandatory for every MR)
+
+Same team rule as Step 1b, for every MR, UI or not: the description shows what was run
+and what came out, not only a checklist for the reviewer. A "How to test" list alone is
+not evidence.
+
+1. **Run the checks yourself** on this branch and record the real outcome: typecheck,
+   lint, format and the unit tests of the affected workspace, plus the relevant e2e spec
+   when there is one. Use the workspace scripts (`check-types`, `lint`, `test:unit`).
+2. **Compare against `main`** when a check is not clean. Run the same command on `main`
+   and name every failure that also happens there as pre-existing (e.g. errors coming
+   from outdated dependencies). Never call a red check "unrelated" without that run.
+3. **Prove the behavior, not only the build.** Add one check that fails on `main` (or
+   without the change) and passes on the branch: a test, a Cypress assertion, a measured
+   value, or for types-only MRs a temporary file with `@ts-expect-error` lines showing what
+   the new types reject. Say whether that check is committed or temporary.
+4. **Integrated check without a real session.** When the change runs inside an app, run
+   it locally with its mocks and the e2e intercepts/fixtures of its `apps/<app>-e2e`
+   package instead of asking for a session.
+5. **Report numbers.** Test counts, error counts, measured px. "Passes" alone is not a result.
+
+Never invent results. If a check could not run, list it with `TODO:` and the reason.
+
+---
+
 ## Step 2 — Write the description
 
 Output ONLY the raw markdown below. No preamble, no explanation, no trailing commentary.
@@ -99,6 +124,15 @@ Output ONLY the raw markdown below. No preamble, no explanation, no trailing com
 <!-- Actionable checklist the reviewer can follow to verify the happy path and edge cases. -->
 
 - [ ] ...
+
+## Results
+
+<!-- Mandatory for every MR. Commands actually run on this branch and on main, with numbers.
+     Name pre-existing failures. Include the check that fails without the change. -->
+
+| Check | Command | main | This branch |
+| --- | --- | --- | --- |
+| ... | ... | ... | ... |
 
 ## Visual evidence
 
@@ -139,10 +173,12 @@ Video: ...
 - **Group by concern**, not by file. If three files all touch the same feature, one section covers them.
 - **Test plan must be actionable.** Each item should describe an explicit action and expected result.
 - **Omit empty sections entirely.** If there are no notes, drop the Notes header too.
-  Exception: a UI change always keeps `Visual evidence`, and a published-package change
+  Exception: every MR keeps `Results`; a UI change always keeps `Visual evidence`, and a published-package change
   always keeps `Integrated check in a consumer app` (with `TODO:` lines if evidence is missing).
 - **How to test for UI changes** includes the viewport and the interaction to reproduce,
   not only "open the page".
 - **No filler phrases.** Don't open with "This MR introduces…" — start with the noun.
+- **Results come from real runs.** Every row in `Results` matches a command you ran in this
+  session; failures that also happen on `main` are labeled pre-existing.
 - Output nothing outside the markdown block, except a short list of missing evidence
-  (the `TODO:` items) for UI or package changes.
+  (the `TODO:` items).
